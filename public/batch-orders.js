@@ -1,6 +1,7 @@
 import {validateOrder,localDateTime} from './core.js';
 import {withDeliveryWindow} from './delivery-slots.js';
 import {findMenuDish,needsItemReview} from './order-review.js';
+import {snapshotItem} from './materials.js';
 
 export function batchDraftIssue(draft,menu){
   const invalid=validateOrder(draft);
@@ -19,6 +20,6 @@ export function prepareBatchOrders(entries,menu,existing,now=new Date(),makeId=(
   return entries.map(({draft})=>{
     let label;do{label=prefix+'-'+String(++number).padStart(3,'0');}while(used.has(label));used.add(label);
     return {...withDeliveryWindow(structuredClone(draft)),id:makeId(),number:label,status:'pending',createdAt:timestamp,updatedAt:timestamp,merchantConfirmedAt:timestamp,requiresMerchantConfirmation:false,
-      items:draft.items.map(i=>{const dish=findMenuDish(menu,i.name);return {...i,name:dish.name,dishId:dish.id,minutes:dish.minutes,...(i.matchType?{merchantReviewedAt:timestamp}:{})};})};
+      items:draft.items.map(i=>{const dish=findMenuDish(menu,i.name);return snapshotItem({...i,name:dish.name,dishId:dish.id,minutes:dish.minutes,...(i.matchType?{merchantReviewedAt:timestamp}:{})},menu);})};
   });
 }

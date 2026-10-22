@@ -501,3 +501,35 @@ Future entry format:
 - Production handoff: Refreshed the existing live Site tab, waited for client initialization, confirmed the OrderWeave language-selection screen loaded, and retained the tab as the deliverable. A full production merchant session was not created or edited by the agent. Local UI tests and the real-provider workerd check provide the functional evidence described above.
 - Cleanup: Stopped the loopback-only simulated API fixture. Removing temporary source-transfer JSON/delta/hash files; source and test changes are already verified on GitHub and the live Site. The release archive and screenshot remain available.
 - Logging: Synchronizing this publication/GitHub result as a documentation-only follow-up; this post-publication log does not trigger another website deployment.
+
+### 2026-10-22 11:15:44 +08:00 — Finalize delivery-window release logging
+
+- Action: Published the release/verification log to GitHub in documentation commit b9b3bc295fee42979b025fb6ac5bca39eba0c012 and read back main to verify that exact head. The live Site remains on tested source b0501d2ff32db08c509d48c02b9f088a82676302.
+- Outcome: Manual/edit scheduling and AI/basic text imports use half-hour windows; range ambiguity, original-time evidence, next-day endpoints and final merchant confirmation are preserved. All required checks and publication steps completed.
+- This local completion entry records the log-sync operation without a recursive log-only commit or redeployment.
+
+### 2026-10-22 18:13:02 +08:00 — Implement structured recipes and material accounting
+
+- Request: Show ingredient requirements on orders, add current-order and daily-consumption summaries, and improve menu ingredient entry. The user confirmed daily consumption should use orders actually delivered today.
+- Investigation: Read project instructions/log and menu/order/import/storage code. Opened the existing Sites source workflow; verified owner access and its one-user private audience. Retained existing source changes and storage identifiers. An initial stylesheet lookup used styles.css; corrected it to the actual style.css without affecting files.
+- Implementation: Added per-serving ingredient rows with names, positive quantities (up to three decimal places) and units, existing-name suggestions, legacy text guidance, bounded validation, localized Chinese/English/Malay copy, order-card/detail material lists and a separate Materials page with two scopes.
+- Accounting: Multiply recipe quantities by servings; normalize g/kg to g and ml/l to ml; keep other units separate. Current scope includes all undelivered orders. Daily scope uses the device-local delivery date. Usage represents recipe-based consumption, excluding waste or ad hoc substitutions.
+- History: New/manual/imported orders capture detached recipe snapshots; same-dish edits preserve them, quantity edits recalculate totals, and batch finalization uses current menu recipes rather than imported recipe fields. Legacy fallback estimates and unquantified/missing recipes are explicitly labeled. Delivery freezes legacy estimates for subsequent history.
+- Verification: Ten focused tests passed for validation, legacy unknown amounts, unit conversion, decimals, snapshots, edits/deleted recipes, batch capture, date scopes and non-mutation. Preparing regression/build and fictional local browser checks; no production merchant data or provider secrets used.
+
+### 2026-10-22 18:15:29 +08:00 — Verify material accounting in the browser and build
+
+- Checks: All 73 tests passed, including 10 new material tests and the actual workerd provider-stub transport regressions. Type checking, JavaScript syntax checks, production build and whitespace checks passed. Chinese, English and Malay dictionaries have 269 matching keys.
+- Local browser: Converted the fictional legacy menu to four ingredient rows (including kg and ml); verified the save confirmation includes the recipe. Current materials included all 11 pre-existing active orders, combined compatible units and separately flagged a custom dish with no recipe. Today-delivered consumption initially contained zero orders.
+- Local browser: Created a two-serving order, edited it to three servings through confirmation, then changed the menu's chicken quantity from 0.2 to 0.3 kg per serving. The order card and detail retained its saved 600 g requirement rather than changing to 900 g. Canceling delivery retained its active status; confirming delivery moved exactly one order into today's totals with 600 g chicken, 90 g peanuts, 150 g pepper and 30 ml oil. Reload preserved this result.
+- Languages/evidence: Verified Chinese, English and Malay material summaries. Browser console reported no errors. Saved full-page screenshot D:/hack/orderweave-materials.jpg. A first menu edit selector used the English-equivalent Chinese label rather than the actual Modify label; inspected the UI and corrected the selector. No application failure occurred.
+- Documentation: Added recipe validation, summary scope, unit conversion, incomplete-data and snapshot behavior to README. All browser records are fictional loopback-only QA data; production merchant data and AI configuration are unchanged. No new provider request is needed because ingredient calculation is local and extraction's outbound payload is unchanged.
+- Status: Preparing the same private Site release and an audited source-only synchronization to the existing private GitHub repository.
+
+### 2026-10-22 18:17:20 +08:00 — Publish material summaries
+
+- Published source commit be50925a5c105830ab81dc76491e264d30fb0490 to the existing owner-private Site. Archive: D:/hack/orderweave-materials-deploy.tar.gz (380,201 bytes). The source helper completed successfully; commit and archive were verified locally.
+- Saved version: appgprj_6ad8c26e2618819193b8337bdb29a5cf~appgver_99e6636d6d6c8191acd4022a30635f9a. Deployment: appgdep_6ad9e2982c088191a1bc040fa8e676ee, succeeded at 18:17:19 local time. Existing environment revision 1, private audience, URL and browser storage keys are unchanged.
+- Website: https://takeaway-desk-cao-1021.crispthyme35.chatgpt.site/ . No production merchant session has been edited by the agent.
+- GitHub inspection: Private main advanced from the previous release through five collaborator commits to d93e3ced5f1040b269739fa66a72db9b739f2948. The comparison showed only five added ai_extraction reference/test documents and no conflicts with this feature. Preserve these additions unchanged by basing the new tree on the current remote tree; do not replace or force history.
+- Action: Preparing an audited tracked-source manifest and feature delta. Browser-local menus/orders/photos, exports, environment files and credentials remain excluded. Post-release documentation does not require another website deployment.
