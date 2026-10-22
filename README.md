@@ -6,7 +6,7 @@ GitHub 源码仓库：[caozheyu780/OrderWeave](https://github.com/caozheyu780/Or
 
 ## Source upload and merchant data
 
-Menu entries, uploaded dish photos, merchant accounts and orders are stored in the website origin's browser localStorage, not in the source repository. Uploading this source does not upload that browser storage. Repository tests contain fictional examples, not an export of a merchant's saved menu or orders.
+Store menus, orders, operator memberships and operation logs are held in the Site's D1 database; dish photos are held in its R2 bucket. These runtime records are separate from the source repository and are never part of a GitHub source upload. Device-local language preferences and the original legacy browser data remain in browser storage. Repository tests contain fictional examples, not an export of a merchant's saved menu or orders.
 
 Local environment files, runtime databases, generated builds, backup exports, screenshots and deployment archives are excluded by `.gitignore`. Keep API keys in server-side secrets; `.env.example` lists variable names with an empty key. Do not manually add merchant backup files or browser profile data to Git. AI extraction separately sends the submitted order text and menu names/aliases to DeepSeek as described below; that runtime request is not a GitHub source upload.
 
@@ -18,7 +18,7 @@ Local environment files, runtime databases, generated builds, backup exports, sc
 
 自动测试：`node --test tests/*.test.mjs`。类型检查：`node node_modules/typescript/bin/tsc --noEmit`。
 
-构建：`node scripts/run-framework.mjs build`。网站使用 Vinext + Cloudflare Workers，通过 Sites 发布；保留 `.openai/hosting.json` 的原项目 ID 和私有访问策略。原来的静态前端已移到 `public/`，网站根路径和浏览器数据键保持不变，已有线上菜单与订单可继续使用。
+构建：`node scripts/run-framework.mjs build`。网站使用 Vinext + Cloudflare Workers，通过 Sites 发布；保留 `.openai/hosting.json` 的原项目 ID 和私有访问策略。原来的静态前端已移到 `public/`，网站根路径和浏览器数据键保持不变，旧版本机菜单与订单保留，可由管理员在空店铺中确认迁移。
 
 ## DeepSeek 配置
 
@@ -33,7 +33,7 @@ Local environment files, runtime databases, generated builds, backup exports, sc
 
 页面入口仍为“添加订单 → 文字识别”。输入文字或上传 TXT 后，用户点击“使用 DeepSeek 识别并核对”，本次文字、菜单的菜名/别名/ID/制作时间，以及浏览器当地时间和时区发送至服务端；**不上传菜单图片**。缺少密钥时按钮禁用并提示。可主动选择“仅使用基础规则识别”，不会把规则解析伪装为 AI 结果。
 
-`GET /api/ai-status` 返回是否配置以及模型名，不返回密钥。`POST /api/parse-order` 使用 JSON 模式抽取菜品、数量、预约送达时间、客户、联系方式、地址、口味、备注及需要核对的问题。两个 API 均需要 Sites 提供的 ChatGPT 登录身份。POST 另有同源检查、请求大小限制及每个运行实例内的简单节流；保留当前仅所有者可访问的站点权限。本地开发通过 starter 的 `/signin-with-chatgpt?return_to=/` 模拟登录。
+`GET /api/ai-status` 返回是否配置以及模型名，不返回密钥。`POST /api/parse-order` 使用 JSON 模式抽取菜品、数量、预约送达时间、客户、联系方式、地址、口味、备注及需要核对的问题。两个 API 均需要 Sites 提供的 ChatGPT 登录身份；解析订单还须验证当前店铺的有效成员身份。POST 另有同源检查、请求大小限制及每个运行实例内的简单节流；保留当前仅所有者可访问的站点权限。本地开发通过 starter 的 `/signin-with-chatgpt?return_to=/` 模拟登录。
 
 服务端验证请求和模型结果、恢复菜单中真实的 ID/制作时长，并检查日期格式。菜名含错别字、同音字、简称或近似表述时，AI 会给出合理菜单猜测，保留原文、匹配依据及最多三个有效候选，；绑定别名标为 `alias`，唯一且高度相似的拼写标为 `similar`，两者仅提示、不要求额外勾选，其余不确定建议标为 `guessed`；完全无关的菜品标为 `unmatched`，不强行匹配。匹配分类由服务端结合原文和当前菜单校验，不采信模型自己声明的高置信度；原文证据无法验证时保留待核对。不捏造缺失的地址、联系方式或姓名。
 
@@ -47,13 +47,13 @@ Local environment files, runtime databases, generated builds, backup exports, sc
 
 ## 原有功能
 
-- 中文、英文和马来语（Bahasa Melayu）切换、本地商家账号注册与登录（随机盐 + PBKDF2 SHA-256）。
+- 中文、英文和马来语（Bahasa Melayu）切换、ChatGPT 身份登录、跨设备共享店铺与独立操作员账号。
 - 菜名、图片、描述、材料和制作时长录入、修改及删除；图片压缩到最长边 800px。
 - 订单菜品、数量、预约、地址、联系方式、口味、备注和客户姓名；可手填菜单外菜品。
 - 订单状态、搜索、进行中/全部/已送达筛选；修改和送达均需确认。
 - 导出当前账号菜单和订单为 JSON；目前没有导入恢复界面。
 
-菜单与订单继续仅保存在当前网站来源的 localStorage，不存入云端数据库；不同设备、浏览器、端口和域名的数据互不共享。清除网站数据会删除记录，建议定期导出。商家本地账号用于区分本机记录，线上站点和 AI API 的访问权限由 Sites 的 ChatGPT 登录与私有策略保护。
+菜单、订单、操作员及操作日志保存到店铺云端，图片保存到受权限保护的对象存储。同一店铺跨设备共享；私有站点访问权限与店铺成员权限分别校验。原 localStorage 资料不会自动上传或删除，管理员可在“操作员 → 迁移本机旧资料”中核验旧密码、核对内容并确认迁移至空店铺。旧密码只在本机核验，不上传。建议继续定期导出备份。
 
 当前不包含顾客在线下单、支付、骑手系统及通知。
 
@@ -61,11 +61,11 @@ Local environment files, runtime databases, generated builds, backup exports, sc
 
 DeepSeek text extraction supports up to 20 independent orders from 20,000 characters. Requests use `batch: true`; responses contain `orders` and batch-level `warnings`. Each order retains its own source excerpt and warnings. Missing fields are left blank. Oversized batches fail explicitly instead of silently dropping orders. The legacy single-order API shape remains available when batch is omitted.
 
-Extraction opens an unsaved review list. Merchants can edit or remove individual orders. Complete orders with exact, bound-alias or unique strong-name matches require no per-order checkbox; missing required fields, unlisted menu items and unreviewed uncertain dish matches block addition. Editing an uncertain order requires dish-level review. A final summary confirms the whole batch, followed by one localStorage write with independent IDs and order numbers. Canceling final confirmation returns to the list without saving. Discarding the list saves nothing. Pending drafts are held in memory and are lost on page refresh. Basic rules still handle one order only and explicitly warn against using them to split multiple orders.
+Extraction opens an unsaved review list. Merchants can edit or remove individual orders. Complete orders with exact, bound-alias or unique strong-name matches require no per-order checkbox; missing required fields, unlisted menu items and unreviewed uncertain dish matches block addition. Editing an uncertain order requires dish-level review. A final summary confirms the whole batch, followed by one atomic cloud transaction with independent IDs and order numbers. Canceling final confirmation returns to the list without saving. Discarding the list saves nothing. Pending drafts are held in memory and are lost on page refresh. Basic rules still handle one order only and explicitly warn against using them to split multiple orders.
 
 ## Bound names and match notices
 
-Menu editing supports up to 20 other names per dish (one per line, up to 100 characters each). Primary names and aliases are normalized and deduplicated; a name cannot belong to two dishes. Aliases are stored with the existing local menu and included in data exports. Both DeepSeek and basic rules resolve them to the canonical dish ID/name. Existing menu records without aliases continue to work.
+Menu editing supports up to 20 other names per dish (one per line, up to 100 characters each). Primary names and aliases are normalized and deduplicated; a name cannot belong to two dishes. Aliases are stored with the shared store menu and included in data exports. Both DeepSeek and basic rules resolve them to the canonical dish ID/name. Existing menu records without aliases continue to work.
 
 A bound name with source evidence is classified as `alias`. Unique close spelling is classified as `similar`: at least four normalized characters, at most one or two edits, similarity at least 0.75, and a margin of at least 0.20 over the next dish; obvious ingredient/size conflicts are excluded. These are deterministic spelling rules, not an AI probability estimate. Both show original-to-menu-name notices in the list and editor without a checkbox. Semantic guesses without a close spelling or a bound name remain uncertain. Ambiguous and unmatched dishes still require explicit handling. The final whole-batch confirmation remains required for every import.
 
@@ -91,4 +91,18 @@ Menu ingredients are structured per-serving rows: name, quantity and unit. Each 
 
 Order cards and details show ingredient requirements multiplied by servings. The Materials page switches between all undelivered orders (including future orders) and orders actually delivered today, using this device's local calendar date and deliveredAt rather than the scheduled date. Ingredient names normalize case/spacing; g/kg combine as g and ml/l as ml. Incompatible units remain separate. Missing quantities or recipes are listed outside numeric totals. Consumption is recipe-based and does not include waste or ad hoc substitutions.
 
-New orders capture materialSnapshot recipes locally, including manual, basic-rule and AI batch orders. Same-dish edits keep the recipe snapshot and recalculate using the edited serving count; switching dishes captures the newly selected recipe. Menu changes or deletion cannot alter saved snapshots. Old orders without snapshots explicitly use an estimate from the current menu, where available. Delivering an old order freezes this estimate; unavailable recipes remain visible as incomplete. These additions do not rewrite browser storage on load or send ingredient recipes to DeepSeek or GitHub.
+New orders capture materialSnapshot recipes with the cloud order, including manual, basic-rule and AI batch orders. Same-dish edits keep the recipe snapshot and recalculate using the edited serving count; switching dishes captures the newly selected recipe. Menu changes or deletion cannot alter saved snapshots. Old orders without snapshots explicitly use an estimate from the current menu, where available. Delivering an old order freezes this estimate; unavailable recipes remain visible as incomplete. These additions do not rewrite browser storage on load or send ingredient recipes to DeepSeek or GitHub.
+
+## Shared stores and operators
+
+Sites/ChatGPT authentication supplies the server-verified identity. A person can create a store or join one through an administrator-issued code. Each store has one protected administrator; operators can manage menus/orders and view logs. Only the administrator can create/revoke invitations, disable/re-enable operators and migrate legacy data into an empty store. Invitations expire after 24 hours, are stored as hashes and can be redeemed once. Website access must be granted through Sites before an operator can reach a private Site; this feature does not broaden the existing audience automatically.
+
+Cloud APIs authorize every store/image/action against active membership. Updates use a store revision and an atomic D1 batch for changed records and audit rows. Stale versions fail with a refresh notice instead of silently replacing concurrent work. Shared data refreshes every 15 seconds while no editing/confirmation dialog is open; open drafts keep their original revision. Server timestamps determine actual new deliveries. Completed orders are immutable. Legacy imports preserve original creation/delivery dates and log imports separately from new deliveries.
+
+The Operation log window pages through 100 records at a time. It records menu/order changes, deliveries, invitations, operator status, migration, store entry/exit, significant views, export, extraction activity, canceled confirmations and rejected authenticated operations. Actor member IDs/names and timestamps are server-derived. Logs exclude credentials, invite codes, order source text and customer/contact/address fields. Dates display in the viewer's device timezone with seconds. It is an application audit trail; draft keystrokes and automatic refreshes are not separate business events.
+
+D1 schema: db/schema.ts; generated immutable migration history: drizzle/. Local setup after build: node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js d1 execute DB --local --config dist/server/wrangler.json --persist-to .wrangler/state --file drizzle/0000_complete_kabuki.sql . Run this only for a previously unapplied local migration. Hosted publication applies pending migrations through Sites.
+
+## Preparation and delivery countdowns
+
+Order cards display summed dish preparation minutes multiplied by servings, with an incomplete-time notice for custom/legacy entries lacking durations. This is a workload estimate rather than a parallel kitchen scheduling model. A per-second timer compares the current device time with the selected delivery window's start. Less than 20 minutes remaining is amber, overdue is red, and delivered orders stop alerts. Exactly 20 minutes remains normal. Invalid/missing schedules are not given invented countdowns.

@@ -541,3 +541,49 @@ Future entry format:
 - Production handoff: No previous live browser tab was available, so opened the deployed URL in a new deliverable tab. The owner-private Site correctly presented the ChatGPT sign-in gate. Did not sign in or create/modify a production merchant session. Native deployment success and the local browser checks verify publication/functionality within that limitation.
 - Cleanup: Stopped the owned loopback preview server. Removing the temporary audited-source/delta/manifest transfer files and feature-edit helper scripts outside the project; keeping the tested release archive and screenshot. No provider/API key was used for this feature.
 - Outcome: Orders show ingredient requirements; Materials switches between undelivered demand and today's delivered recipe-based consumption; menu editing supports per-serving quantities/units with explicit legacy/incomplete-data handling. English operation history is retained here. Synchronizing this final release log to GitHub as documentation only.
+
+### 2026-10-22 18:19:25 +08:00 — Finalize materials release logging
+
+- Published the final release log in GitHub commit ad70a6c51b61c62738ac239aca40a105760f656d and verified main matches it. Temporary source-transfer and feature-edit helper files were removed successfully; the screenshot and release archive remain available.
+- The private live Site remains on tested source be50925a5c105830ab81dc76491e264d30fb0490. All requested changes are published, with 73 passing tests and verified local UI behavior. This completion appendix does not trigger a recursive log-only commit or website redeployment.
+
+
+### 2026-10-22 18:34:12 +08:00 — Implement shared stores, identity-bound operators and audit records
+
+- Request: Show preparation estimates on order cards, highlight orders due in under 20 minutes with live remaining time, support multiple operators and add an operation log. The user explicitly chose server-side storage shared across devices.
+- Design: Preserve Sites/ChatGPT sign-in and its existing private audience. Each store has an administrator and individually identity-bound operators; hashed, one-use, 24-hour invitations enroll operators. Administrators can revoke invitations or disable operators. Membership and role checks run on every server operation, including protected image reads and AI extraction. The Site access gate still applies before a person can join a store.
+- Storage: Declared D1 for store/member/record/invitation/audit tables and R2 for menu photos. Generated and inspected bounded schema-only SQL plus Drizzle metadata. Business updates use atomic revision checks and audit rows, rejecting stale writes instead of overwriting another operator. Server records actor IDs/names and timestamps; clients cannot choose attribution.
+- UI: Replaced local account login with store selection/create/join, added operator and paginated log windows, asynchronous cloud saves, 15-second shared-state refresh, card preparation totals and one-second countdown updates. The delivery window start is the deadline: under 20 minutes is amber, overdue is red, completed orders have no warning.
+- Compatibility: Added owner-only migration into an empty store with local verification of the old password and final transfer confirmation. Credentials are not uploaded; original local data is retained. Historical creation/delivery timestamps are preserved so migration does not count old deliveries as today's consumption.
+- Verification: Five new focused checks passed in actual local D1/R2/workerd, covering timing boundaries, shared reads, image authorization, spoofed actor rejection, stale/concurrent writes, atomic audit counts, single-use invitations, roles, disabled users, tenant isolation, CSRF, and historical migration. No production merchant data or provider key was used.
+- Correction: Initial D1/R2 manifest values used objects; the project's Vite configuration requires binding-name strings. Type checking caught this before release; corrected to DB and BUCKET and rebuilding. An optional template example README was absent; the supported storage/identity/preview references and actual starter configuration supplied the needed contracts.
+- Status: Completing browser QA and production checks before publication. Runtime cross-device records will stay separate from the source-only GitHub repository.
+
+### 2026-10-22 18:41:00 +08:00 — Verify multi-operator workflows and live order alerts
+
+- Checks: All 78 tests passed after introducing shared storage and timing. Added and separately passed further D1/R2 cases for failed-operation attribution, invitation revocation/expiry and 100-row audit pagination without duplicate entries. Type checking, the updated production build and dictionary parity passed. The local schema migration executed eight statements successfully against the built preview DB, without touching hosted data.
+- Built-runtime smoke check: The actual compiled Worker returned HTTP 401 for an anonymous workspace request and HTTP 200 with an empty membership list for fictional local authenticated headers. D1 and R2 preview bindings were present. Headers were used only on loopback, never against the hosted Site.
+- Browser: Created an administrator-owned fictional store; confirmed migration of one menu dish and 13 legacy orders after local password verification and a count summary. A second isolated origin joined as a distinct kitchen operator and read the same menu, orders and photos. Historical delivered totals stayed at one for today.
+- Concurrent UI edits: Both operators opened the same record. The kitchen operator changed its delivery slot/notes, then the administrator's stale save was rejected and refreshed. The shared kitchen update remained intact. The log showed the kitchen operator's member name/ID and server timestamp to the second.
+- Access controls: Administrator suspension required confirmation; the suspended operator's reloaded session had no accessible store. Re-enabling restored membership. Chinese, English and Malay account/order/log labels rendered correctly. No browser console errors were seen.
+- Alerts: A 19:00 order transitioned into its under-20-minute amber state automatically; the UI showed a decrementing mm:ss countdown and a 30-minute preparation estimate for two servings. Overdue legacy orders displayed red-state countdowns. Evidence: D:/hack/orderweave-order-alerts.jpg and D:/hack/orderweave-operations-log.jpg. An initial search used notes, which are outside the existing search fields; searching the order number gave the intended single-card capture.
+- Refinement: Migration events now identify imported dishes/orders rather than implying fresh deliveries. Rejected authenticated operations receive failure audit records. Added significant dialog/filter/import/rule-recognition events and a normal Sites account-switch link. Updated documentation and formerly local-only UI copy for shared cloud storage.
+- Status: Running final checks/build on these refinements before source publication. The browser fixture uses fictional identities and a separate ephemeral local D1/R2 instance; no production accounts, records or AI key have been used.
+
+### 2026-10-22 18:42:26 +08:00 — Resolve local build-output lock
+
+- Final 78 tests and type checking passed. The subsequent build could not clean dist because the owned built-Worker preview was still using it (Windows EPERM). Stopped that local preview after the successful runtime smoke checks, then reran the build; no source, migration history or hosted state was deleted or reset.
+
+
+### 2026-10-22 18:43:03 +08:00 — Finalize cloud release checks
+
+- Rebuild succeeded after releasing the local preview lock. All 78 tests and type checking passed, and all three languages have 376 matching translation keys. Whitespace checking identified an extra terminal blank line in the work log; normalized only that trailing whitespace before packaging.
+- Prepared the source and deployment archive workflow with D1/R2 binding declarations, generated schema/migration metadata, shared-store UI/API, operator authorization, server audit records, legacy migration and order timing. Existing private audience and provider secret configuration are preserved.
+
+### 2026-10-22 18:44:55 +08:00 — Publish cloud operators, audit logs and order alerts
+
+- Published tested source d6c207a96b39fc7c65dd6216490280c4f2c2b571 using D:/hack/orderweave-operators-deploy.tar.gz (395,319 bytes). The source helper completed and the commit/archive were verified locally.
+- Saved version: appgprj_6ad8c26e2618819193b8337bdb29a5cf~appgver_93c6c1f3abec8191acb4f1ca6bb3ec3a. Deployment appgdep_6ad9e8e20ee081919ec039dd7c53e7e7 succeeded at 18:44:15 local time. Existing environment revision 1 and private Site audience remain unchanged.
+- The release declares DB (D1) and BUCKET (R2), with generated schema-only migration history. No hosted customer/store data was created by the agent. Existing browser-local accounts remain intact until the merchant explicitly verifies and confirms migration into an empty cloud store.
+- Validation: 78 passing tests, type checking, successful production build, 376-key language parity, whitespace checks, two-origin shared-operator browser workflows and built-Worker identity/storage smoke checks. Preserved the same website URL and provider configuration.
+- GitHub: Verified the repository remains private and main still points to ad70a6c51b61c62738ac239aca40a105760f656d. Preparing an audited source-only tree based on that head, preserving the five remote collaborator reference documents. Runtime D1/R2 data, old browser storage, images, exports and credentials are outside this upload.

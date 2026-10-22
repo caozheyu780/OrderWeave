@@ -5,11 +5,11 @@ export async function getAIStatus(){
   if(!response.ok)throw new Error(response.status===401?'AUTH_REQUIRED':'AI_UNAVAILABLE');
   return response.json();
 }
-export async function recognizeWithAI(text,menu){
+export async function recognizeWithAI(text,menu,merchantId){
   let response;
   try{response=await fetch(AI_ENDPOINT,{
     method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({batch:true,text,menu:menu.map(({id,name,minutes,aliases})=>({id,name,minutes,...(aliases?.length?{aliases}:{})})),localNow:localDateTime(new Date()),timeZone:Intl.DateTimeFormat().resolvedOptions().timeZone||'UTC'}),
+    body:JSON.stringify({merchantId,batch:true,text,menu:menu.map(({id,name,minutes,aliases})=>({id,name,minutes,...(aliases?.length?{aliases}:{})})),localNow:localDateTime(new Date()),timeZone:Intl.DateTimeFormat().resolvedOptions().timeZone||'UTC'}),
     signal:AbortSignal.timeout(75000)
   });}catch(error){throw new Error(error.name==='TimeoutError'||error.name==='AbortError'?'AI_TIMEOUT':'AI_UNAVAILABLE');}
   let result;try{result=await response.json();}catch{throw new Error('AI_INVALID_RESPONSE');}
