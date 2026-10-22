@@ -674,3 +674,10 @@ Future entry format:
 - Verification: All Chinese/English/Malay message values are free of competition/demonstration wording; build, whitespace scan and fresh-origin browser inspection passed. Screenshot: D:/hack/orderweave-login-clean.jpg. No merchant data was modified.
 - Preparing the three reviewed source/documentation files for the existing private GitHub repository, preserving all other source and collaborator files. Historical work-log entries remain unchanged.
 
+### 2026-10-22 19:12:41 +08:00 — Verify wording release and GitHub synchronization
+
+- Published the three reviewed translation/documentation/log files to private GitHub main in commit bf911a17e9da8b8503d54c8109b65e71a3cfe8da. Verified their exact blob hashes in tree ce3ff4b19be87f7b026a504079670beeb7b2d89b, retained other files through the current base tree (85 total source/reference files), and updated the branch with its expected prior head without force. Readback confirmed the commit.
+- Refreshed the live Site deliverable tab; the existing ChatGPT access gate loaded. No production merchant session/data was created or edited. Native publication success and the fresh-origin login screenshot provide the release evidence.
+- The three-language UI now uses neutral storage/account wording. Historical work-log entries and compatibility-sensitive identifiers are retained. No functional tests were added or repeated for this copy-only edit; production build, full message-value scan, whitespace checks and browser review passed.
+- Tool correction: Passing the full accumulated log through a Windows command argument exceeded the command-line length limit (error 206) before execution. Appended this short entry locally instead and used the in-memory complete content for GitHub; no source or merchant data was affected.
+- Stopped the owned local preview. Removing temporary transfer/copy-edit helper files; retaining the release archive and D:/hack/orderweave-login-clean.jpg. This final release-log synchronization is documentation only.
