@@ -435,3 +435,12 @@ Future entry format:
 - Verification: Ignore checks confirmed merchant backup filenames, backup/export/screenshot folders, environment files, local SQLite databases and build output are excluded. Whitespace checks passed.
 - GitHub action: Initialized the previously empty private repository with the reviewed README. Initial commit: 05efa58c51e1bc9db368e0d307e6bfb11d8817e4. The remaining upload will be the current audited source snapshot; local historical Git commits and browser storage are not part of that transfer.
 - Action: Preparing a deterministic UTF-8 manifest of tracked source files and expected Git blob hashes, then uploading via connected GitHub tree/commit operations. No provider credential, browser profile, merchant export or deployment bundle is included.
+
+### 2026-10-22 10:55:48 +08:00 — Upload and verify the private GitHub source repository
+
+- Destination: https://github.com/caozheyu780/OrderWeave . Reused the existing private repository; default branch main and owner/admin access were verified.
+- Upload: Created a complete tree for the 62 reviewed UTF-8 project files. Compared every uploaded blob SHA with the deterministic local manifest before publishing; all 62 matched and no additional files were present. Source manifest SHA-256: 82f062704d6f53d46df778383e35a57aa9f50786dc835ea54aa07a5ecea11b00.
+- Source tree: 439f42803ec86981efe72277db94b4019de6c002. Source import commit: f336725d3a5186ed8b2d7de08dab245ba9a9f125, parent 05efa58c51e1bc9db368e0d307e6bfb11d8817e4. Updated main with the expected parent and without forcing history. Read back main and repository metadata; the expected source commit and private visibility were confirmed.
+- Privacy result: No browser localStorage/session/profile, saved merchant menu/order/photo export, API key, ignored environment file, runtime database, build output or deployment archive was uploaded. Fictional source/test examples are included. Only the current reviewed source snapshot was imported; local historical Git commits were not pushed.
+- Local changes: Added defensive ignore patterns and documented the source/runtime-data distinction in README. The published website, Sites private access and runtime secrets were not changed. No build or deployment was run for these documentation/ignore changes.
+- Logging: Appended the upload and verification outcome; synchronizing this work-log result as a documentation follow-up in the same repository.
