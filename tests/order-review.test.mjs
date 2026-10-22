@@ -1,0 +1,20 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {applyItemReview,needsItemReview,suggestedMenuName} from '../public/order-review.js';
+const menu=[{id:'chicken',name:'宫保鸡丁',minutes:15},{id:'rice',name:'米饭',minutes:5}];
+const guess={dishId:'chicken',name:'宫保鸡丁',quantity:2,originalName:'宫爆鸡丁',matchType:'guessed',matchReason:'同音字'};
+const at='2026-10-21T16:30:00Z';
+test('uncertain suggestions and unmatched rows cannot be accepted without explicit review',()=>{for(const matchType of ['guessed','unmatched'])assert.throws(()=>applyItemReview({...guess,matchType},'米饭',2,menu,false,at),/MATCH_REVIEW_REQUIRED/);});
+test('a merchant correction uses the chosen dish and preserves original AI evidence',()=>{
+ const item=applyItemReview(guess,'米饭',3,menu,true,at);assert.equal(item.name,'米饭');assert.equal(item.dishId,'rice');assert.equal(item.minutes,5);assert.equal(item.originalName,'宫爆鸡丁');assert.equal(item.recognizedName,'宫保鸡丁');assert.equal(item.quantity,3);assert.equal(item.merchantCorrected,true);assert.equal(item.merchantReviewedAt,at);assert.equal(item.matchType,'guessed');
+});
+test('acknowledgement cannot authorize a dish outside the menu',()=>{assert.throws(()=>applyItemReview(guess,'手写新菜名',1,menu,true,at),/MENU_ITEM_REQUIRED/);});
+test('accepted suggestion keeps the distinction between AI guess and merchant confirmation',()=>{const item=applyItemReview(guess,'宫保鸡丁',2,menu,true,at);assert.equal(item.matchType,'guessed');assert.equal(item.merchantCorrected,false);assert.equal(item.merchantReviewedAt,at);});
+test('old manual orders and dish snapshots remain supported',()=>{const item=applyItemReview({name:'已下架菜品',dishId:'retired',minutes:8},'已下架菜品',1,menu,false,at);assert.equal(item.dishId,'retired');assert.equal(item.minutes,8);assert.equal(needsItemReview(item),false);});
+test('unmatched numeric text is not a suggestion and cannot be accepted even when checked',()=>{const item={name:'1235',originalName:'1235',matchType:'unmatched',dishId:null};assert.equal(suggestedMenuName(item,menu),'');assert.throws(()=>applyItemReview(item,'123',12,menu,true,at),/MENU_ITEM_REQUIRED/);});
+test('merchant can resolve unmatched text by selecting an actual menu dish',()=>{const item=applyItemReview({name:'1235',originalName:'1235',matchType:'unmatched'},'米饭',12,menu,true,at);assert.equal(item.dishId,'rice');assert.equal(item.name,'米饭');assert.equal(item.originalName,'1235');assert.equal(item.recognizedName,'');assert.equal(item.merchantCorrected,true);});
+test('all rows of imported orders are checked, including new rows with no AI metadata',()=>{assert.throws(()=>applyItemReview({},'123',1,menu,true,at,true),/MENU_ITEM_REQUIRED/);assert.equal(applyItemReview({},'米饭',1,menu,true,at,true).dishId,'rice');});
+test('deleted menu dishes cannot be reused in imported orders',()=>{assert.throws(()=>applyItemReview({...guess,matchType:'exact'},'宫保鸡丁',1,[],true,at),/MENU_ITEM_REQUIRED/);});
+test('unlisted manual entry is still supported outside the text-import workflow',()=>{assert.equal(applyItemReview({},'手写新菜名',1,menu,false,at,false).name,'手写新菜名');});
+test('a fake suggested name is never displayed as a menu suggestion',()=>{assert.equal(suggestedMenuName({...guess,name:'1235',suggestedName:'1235'},menu),'');assert.equal(suggestedMenuName(guess,menu),'宫保鸡丁');});
+test('history preserves a real original menu suggestion after a merchant chooses another dish',()=>{assert.equal(suggestedMenuName({...guess,name:'米饭',dishId:'rice',recognizedName:'宫保鸡丁'},menu),'宫保鸡丁');});
