@@ -493,3 +493,11 @@ Future entry format:
 - Tool correction: The source helper completed successfully but PTY wrapping inserted control characters into its final JSON. Verified the exact commit via git rev-parse and the returned archive path/size before invoking publication. No rebuild or duplicate source publication was needed.
 - Verification summary: 63 tests, type/syntax checks, build, browser compatibility/manual/import/final-confirmation/persistence checks and real DeepSeek point/range extraction passed. Screenshot: D:/hack/orderweave-delivery-slots.jpg.
 - GitHub synchronization: The existing private repository main still matches the previously verified documentation commit e335ca9a63e9d48769048b85eb8711f56948a362. Preparing an audited source-only update; no merchant records, images, browser storage or credentials are included.
+
+### 2026-10-22 11:15:24 +08:00 — Verify publication and synchronize private GitHub source
+
+- GitHub: Uploaded 12 source/documentation/test changes to the existing private caozheyu780/OrderWeave repository using the prior verified tree as a base. Compared all 64 resulting source-file Git blob hashes with the audited local manifest before committing; every hash matched and there were no extra files.
+- GitHub tree: 432268c58f11a18ceb6da26edcf8a1868d641b00. Commit: c548c155202baf6f57ec913da95769f8df45a532. Updated main without force and verified the resulting branch head. Merchant browser storage, images, exports, runtime data and API credentials were excluded.
+- Production handoff: Refreshed the existing live Site tab, waited for client initialization, confirmed the OrderWeave language-selection screen loaded, and retained the tab as the deliverable. A full production merchant session was not created or edited by the agent. Local UI tests and the real-provider workerd check provide the functional evidence described above.
+- Cleanup: Stopped the loopback-only simulated API fixture. Removing temporary source-transfer JSON/delta/hash files; source and test changes are already verified on GitHub and the live Site. The release archive and screenshot remain available.
+- Logging: Synchronizing this publication/GitHub result as a documentation-only follow-up; this post-publication log does not trigger another website deployment.
