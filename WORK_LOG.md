@@ -597,3 +597,47 @@ Future entry format:
 - User handoff: Create a cloud store, then use Operators to verify and confirm migration of legacy local records into the empty store. Invite operators using one-use codes after granting them access to the private website. Private audience, provider secrets and original local records are preserved.
 - Logging: Synchronizing this final English release/verification entry to GitHub as documentation only; no website redeployment is needed for post-publication log updates.
 - Preview-only diagnostic: The static loopback wrapper reported missing optional favicon.ico requests during teardown. Its real application/API checks passed; production uses the framework asset handler, and no production failure was observed.
+
+### 2026-10-22 18:46:52 +08:00 — Finalize shared-operator release logging
+
+- Published final verification/work-log commit 3a5872d6b8ce83f007e11e77591468d6b72e947c and verified main matches it. Removed the owned temporary source-transfer and feature-edit helper files. The ignored two-origin preview wrapper, release archive and screenshots remain available for local reference.
+- Live release remains on tested source d6c207a96b39fc7c65dd6216490280c4f2c2b571. Preparation estimates, delivery alerts, shared stores/operators, migration and server audit logs are published. This completion appendix does not trigger another log-only commit or deployment.
+
+### 2026-10-22 18:56:06 +08:00 — Switch competition demo to browser-local operators and records
+
+- User request: Store the multi-operator account data locally for competition demonstration because cloud storage is not configured. Read project instructions/log and current storage/auth/UI implementation; opened the existing Sites source workflow.
+- Audience discovery: Current Site access is custom with four allowed users, rather than the prior owner-only audience. Preserve this exact sharing scope and use the general saved-version deployment flow. No access policy changes are requested or performed.
+- Implementation: Added a browser-local workspace adapter for separate password-based operator accounts, store menus/orders/photos, hashed single-use invitations, role checks and attributed operation logs. Account passwords use salted PBKDF2; plaintext passwords and raw invitation codes are not retained in persistent records. Sessions are per tab; same-browser operators share the local store.
+- Compatibility: Existing legacy local accounts, salts/hashes, menus, images and order history can be read directly and retained under a separate demo storage key. Original legacy records are not overwritten. New UI labels explicitly describe local-only scope, account switching and lack of cross-device synchronization.
+- Hosting: Disabled D1/R2 bindings for the demo and retained schema/source history for future use. The frontend workspace adapter makes no workspace network requests. AI remains server-side with Sites authentication, same-origin/size/rate protections and the existing secret; demo extraction no longer requires a D1 membership lookup.
+- Status: Running focused persistence/account/permission/conflict/legacy tests and browser validation before updating the deployed Site and private GitHub source. No live merchant records, runtime cloud stores or credentials have been edited by the agent.
+
+
+### 2026-10-22 19:00:26 +08:00 — Verify the browser-local competition workflow
+
+- Focused tests: Seven local-adapter tests passed for password hashing/session restoration, operator sharing and roles, store/browser isolation, legacy password/menu/history compatibility, concurrent stale revisions, quota/invalid-data preservation, single-use/revoked/expired invitations and audit pagination. Full regression suite passed 85 tests; type checking and production build passed without D1/R2 bindings.
+- Browser: Original fictional local account signed in with its unchanged credentials; one menu and 13 historic orders remained available, with 11 active and one delivered today. Created a new local kitchen operator through an invitation in a second tab of the same origin. The kitchen account edited an existing order through confirmation; reload preserved its own login and the edit, while the owner tab retained its distinct session and could read the kitchen-attributed log.
+- AI UI check: Used a simulated two-order response, reviewed the batch, confirmed it and reloaded. Both orders persisted locally (13 active after addition), retaining recipe quantities, half-hour windows and countdown/preparation displays. No provider key or real merchant/customer data was used.
+- Evidence: D:/hack/orderweave-local-demo.jpg shows the local-only banner, operator identity, persisted order, preparation estimate and imminent-delivery countdown. Verified no application console errors during the checked flow.
+- Refinements: Removed duplicate login audit entries and made newly generated invitations appear immediately in the pending list. Updated Chinese/English/Malay copy and README for local-only storage, preserved legacy records, per-tab sessions, demonstration permissions and the still-server-side AI interface. All three dictionaries contain 388 matching keys.
+- Status: Final checks and compiled-Worker smoke verification are next, followed by deployment preserving the current four-user custom audience and an audited private GitHub source update.
+
+### 2026-10-22 19:02:19 +08:00 — Finish local-demo runtime and language verification
+
+- Actual compiled Worker (no D1/R2 bindings): Cloud workspace endpoint returned LOCAL_DEMO/503, unauthenticated extraction returned AUTH_REQUIRED/401, and authenticated invalid extraction returned INVALID_REQUEST/400 without any membership/database dependency or provider request.
+- Preview correction: The first authenticated smoke request was interrupted by a local Worker restart and returned a non-JSON restart message. Read troubleshooting guidance, restarted the owned preview and repeated the safe invalid-input request successfully. Stopped both compiled-preview sessions afterward; no application change was needed for that transient preview event.
+- Browser: Confirmed local invitations appear immediately in the pending list and can be revoked through confirmation. Verified Chinese, English and Malay local-demo/account/log wording; browser console contained no application errors. The simulated AI batch persisted through reload and retained distinct operator attribution.
+- Local preview telemetry: The no-database static wrapper recorded zero workspace API requests and one simulated AI extraction. All registration/login/invitation/menu/order/log storage behavior ran in the browser. Stopped the owned wrapper after QA; no live provider credential was used.
+- Final checks: 85 tests, type checking, production build, JavaScript syntax, 388-key three-language parity and whitespace checks passed. Preparing publication with the unchanged four-user custom access policy, followed by source-only GitHub synchronization.
+
+### 2026-10-22 19:02:56 +08:00 — Clarify preview telemetry evidence
+
+- Correction to the preceding entry: stopping the static wrapper returned no counter output, so its exact telemetry totals were not captured. One simulated AI request was observed through the browser flow. The workspace adapter's lack of fetch calls, the no-database browser workflow and focused tests support local-only workspace behavior; an emitted zero-request telemetry report was not obtained. No production behavior or test result is changed by this evidence clarification.
+
+### 2026-10-22 19:05:00 +08:00 — Publish the local competition demo
+
+- Source commit: eaa22f1159717aeb39c829edf45c080693705418. Packaged archive D:/hack/orderweave-local-demo-deploy.tar.gz (397,266 bytes); verified helper output, exact Git HEAD and archive before saving.
+- Saved Site version 13: appgprj_6ad8c26e2618819193b8337bdb29a5cf~appgver_640a4270ada88191885349e099679f2a. Deployment appgdep_6ad9ed95e7e8819196894c202d2c944e succeeded at 19:04:16 local time.
+- Used the general saved-version deployment flow because the Site now has four allowed users under a custom audience. Preserved its access policy, deployed URL and environment revision 1; no invitation/access grant was added by the agent.
+- The active frontend stores workspace accounts, menus/photos, orders and audit records in browser storage. D1/R2 bindings are disabled and cloud workspace API is inactive. Existing legacy browser data remains available via original credentials. AI retains authenticated server-side extraction and the existing provider secret.
+- GitHub preparation: Verified the existing repository is private and its main still equals the prior log commit 3a5872d6b8ce83f007e11e77591468d6b72e947c. Auditing tracked source only; local merchant/operator/browser records and runtime databases are not part of the upload. Preserve the five collaborator reference documents.

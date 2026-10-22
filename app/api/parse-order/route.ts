@@ -1,6 +1,7 @@
 import { env } from 'cloudflare:workers';
 import { AIError, extractOrder } from '../../../lib/deepseek.mjs';
 import { getChatGPTUser } from '../../chatgpt-auth';
+import {LOCAL_DEMO} from '../../../lib/app-mode.mjs';
 export const dynamic = 'force-dynamic';
 const rate = new Map<string, {start: number; count: number}>();
 export async function POST(request: Request) {
@@ -23,8 +24,8 @@ export async function POST(request: Request) {
     try { while (true) { const {done, value} = await reader.read(); if (done) break; length += value.length; if (length > 200000) { await reader.cancel(); throw new AIError('REQUEST_TOO_LARGE',413); } chunks.push(value); } } finally { reader.releaseLock(); }
     const bytes = new Uint8Array(length); let offset = 0; for (const chunk of chunks) {bytes.set(chunk,offset); offset += chunk.length;}
     let input; try {input = JSON.parse(new TextDecoder().decode(bytes));} catch {throw new AIError('INVALID_REQUEST',400);}
-    const member = env.DB && typeof input.merchantId==='string' && await env.DB.prepare('SELECT id FROM members WHERE store_id=? AND user_id=? AND disabled=0').bind(input.merchantId,user.userId).first();
-    if(!member) return Response.json({error:'AUTH_REQUIRED'}, {status:403,headers:{'Cache-Control':'no-store'}});
+    if(!LOCAL_DEMO){const member = env.DB && typeof input.merchantId==='string' && await env.DB.prepare('SELECT id FROM members WHERE store_id=? AND user_id=? AND disabled=0').bind(input.merchantId,user.userId).first();
+    if(!member) return Response.json({error:'AUTH_REQUIRED'}, {status:403,headers:{'Cache-Control':'no-store'}});}
     const result = await extractOrder(input, env);
     return Response.json(result, {headers:{'Cache-Control':'no-store'}});
   } catch (error) {
