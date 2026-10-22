@@ -681,3 +681,38 @@ Future entry format:
 - The three-language UI now uses neutral storage/account wording. Historical work-log entries and compatibility-sensitive identifiers are retained. No functional tests were added or repeated for this copy-only edit; production build, full message-value scan, whitespace checks and browser review passed.
 - Tool correction: Passing the full accumulated log through a Windows command argument exceeded the command-line length limit (error 206) before execution. Appended this short entry locally instead and used the in-memory complete content for GitHub; no source or merchant data was affected.
 - Stopped the owned local preview. Removing temporary transfer/copy-edit helper files; retaining the release archive and D:/hack/orderweave-login-clean.jpg. This final release-log synchronization is documentation only.
+
+### 2026-10-22 19:12:59 +08:00 — Finalize wording cleanup logging
+
+- Verified final GitHub documentation commit 34acd283a4e6ab5182f2a3c806f15941eadddf13 on main and removed the owned temporary copy/transfer helpers. Live Site version 14 remains on checked source 8d743a2d25a2046bd116c0899228d9e9348b01da. This completion appendix does not trigger another log-only commit or deployment.
+
+
+### 2026-10-22 19:22:55 +08:00 — Revise local store membership and order logging
+
+- Investigated the local adapter, authentication/member/log UI, translations, tests, project instructions and current Site. Opened the existing source workflow from checked live source 8d743a2d25a2046bd116c0899228d9e9348b01da; retained the four-user custom audience, local storage mode and provider configuration.
+- Implemented reusable cryptographically generated store codes, lazily persisted for existing stores under the same write lock. Joining uses the store code and the new member's display name. Existing merchant records and old invitation history remain stored.
+- Added the account list and code panel for every member, with administrator-only confirmed deletion of ordinary accounts. Deleted sessions are rejected on subsequent requests; account changes trigger cross-tab access checks. Orders and prior actor attribution remain intact; the owner is protected.
+- Restricted new log writes and displayed history to actual saved order creation, edits, import and delivery. Historical non-order rows remain stored but are filtered before pagination. Navigation and other minor events perform no log writes. Updated Chinese, English, Malay and current README guidance.
+- Preparing substantive adapter regression tests and UI checks. An initial rg glob used PowerShell's literal wildcard path and failed; subsequent searches use the tests directory. No merchant or production runtime data was edited.
+
+
+### 2026-10-22 19:25:17 +08:00 — Verify reusable codes, account access and order-only logs
+
+- Focused adapter tests passed (8); the full suite passed (86), including actual workerd/D1/R2 regressions for retained dormant cloud code. TypeScript, JavaScript syntax and whitespace checks passed; all three language dictionaries have the same 398 keys.
+- Browser QA on the owned loopback preview confirmed legacy owner sign-in preserves existing menu/orders, an existing store receives a stable readable code, administrators see a delete button and confirmation, cancel returns to the unchanged member list, and an ordinary operator sees both accounts without any delete button. The order log shows only the three prior saved order changes, with time and actual operator attribution. No account was deleted in the browser; permanent deletion/session rejection is covered by isolated in-memory tests.
+- Saved D:/hack/orderweave-accounts.jpg with the Chinese account/code panel. Production merchant data was not opened or edited. Added deletion-quota and failed-order-write assertions to verify atomicity; removed a redundant catch/rethrow before the final focused recheck/build.
+- Editing correction: The first temporary edit script looked for member actions in the wrong sequence and stopped before writing application files. Corrected its bounded endpoint to the export action and reran successfully. A partial patch then failed its context check without changing files; applied the corrected patch. All final edits are verified below.
+
+
+### 2026-10-22 19:25:53 +08:00 — Build and package membership changes
+
+- Final focused tests passed (8), including quota-failure deletion rollback and failed-order-write rollback. Production build completed successfully; final JavaScript syntax and whitespace checks passed. The prior full suite of 86 tests and TypeScript checks also passed; no source changed after this final build.
+- Confirmed the existing GitHub repository remains private and main is still 34acd283a4e6ab5182f2a3c806f15941eadddf13. Preparing a base-tree source update to preserve collaborator reference files. Merchant browser data and server secrets are excluded.
+- Preparing publication of the same Site and unchanged audience/environment configuration. The reviewed screenshot is D:/hack/orderweave-accounts.jpg. Browser deletion was canceled; irreversible account removal and invalidated sessions were tested only in isolated in-memory fixtures.
+
+
+### 2026-10-22 19:27:28 +08:00 — Publish reusable store codes and account list
+
+- Packaged and pushed tested source 0256fb8fbd0fa86547ec483a81782d9f2fe654f2 with archive D:/hack/orderweave-store-code-deploy.tar.gz (398,190 bytes). Saved Site version 15: appgprj_6ad8c26e2618819193b8337bdb29a5cf~appgver_5c6b25d756788191bb452620e66a9762.
+- Deployment appgdep_6ad9f2fa07d4819196dc53645b699004 succeeded at 19:27:13 local time on the same Site URL. Preserved the four-user custom audience, environment revision 1, unbound cloud storage and existing server-side AI configuration.
+- The source audit checked all 80 tracked UTF-8 files for accidental runtime data or common credential patterns. Only six source/documentation/test files differ from GitHub main. Preparing the private repository update with its current base tree, retaining all five collaborator-only AI reference files. Browser data, photos, secrets, screenshots and deployment archives are not uploaded to GitHub.
