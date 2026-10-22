@@ -4,15 +4,15 @@ OrderWeave 是面向小型餐饮店铺的菜单、外卖订单与配送管理平
 
 GitHub 源码仓库：[caozheyu780/OrderWeave](https://github.com/caozheyu780/OrderWeave)（私有）。
 
-## Current mode: local competition demo
+## Current mode: browser-local storage
 
 This release uses browser-local accounts and storage. D1/R2 bindings are disabled, and the frontend does not call the cloud workspace API. Separate local operator accounts share a store in the same browser and website origin; different devices/browsers do not synchronize. AI extraction still uses the existing authenticated server endpoint and provider secret.
 
-Sign in with an existing legacy local account, or create a local store and administrator account. Administrators generate one-use codes; choose Join local store to register another local operator. Switch accounts through sign-out/sign-in, or use separate tabs in the same browser. Menus, images, orders, credentials (salted hashes) and operation logs persist after reload. Local demo permissions and audit records are not a server-enforced multi-device security system.
+Sign in with an existing legacy local account, or create a local store and administrator account. Administrators generate one-use codes; choose Join local store to register another local operator. Switch accounts through sign-out/sign-in, or use separate tabs in the same browser. Menus, images, orders, credentials (salted hashes) and operation logs persist after reload. Local permissions and audit records are not a server-enforced multi-device security system.
 
 ## Source upload and merchant data
 
-The active demo stores accounts, menus/photos, orders and logs in browser localStorage under orderweave-demo-v1. Tab sessions use sessionStorage. These runtime records are outside the source repository and are never part of a GitHub source upload. The original takeaway-desk-v1 records and language preference are preserved. Clearing browser data removes the demo; export business-data backups regularly. Repository tests contain fictional examples, not an export of a merchant's saved menu or orders.
+The application stores accounts, menus/photos, orders and logs in browser localStorage under orderweave-demo-v1. Tab sessions use sessionStorage. These runtime records are outside the source repository and are never part of a GitHub source upload. The original takeaway-desk-v1 records and language preference are preserved. Clearing browser data removes these records; export business-data backups regularly. Repository tests contain fictional examples, not an export of a merchant's saved menu or orders.
 
 Local environment files, runtime databases, generated builds, backup exports, screenshots and deployment archives are excluded by `.gitignore`. Keep API keys in server-side secrets; `.env.example` lists variable names with an empty key. Do not manually add merchant backup files or browser profile data to Git. AI extraction separately sends the submitted order text and menu names/aliases to DeepSeek as described below; that runtime request is not a GitHub source upload.
 
@@ -39,7 +39,7 @@ Local environment files, runtime databases, generated builds, backup exports, sc
 
 页面入口仍为“添加订单 → 文字识别”。输入文字或上传 TXT 后，用户点击“使用 DeepSeek 识别并核对”，本次文字、菜单的菜名/别名/ID/制作时间，以及浏览器当地时间和时区发送至服务端；**不上传菜单图片**。缺少密钥时按钮禁用并提示。可主动选择“仅使用基础规则识别”，不会把规则解析伪装为 AI 结果。
 
-`GET /api/ai-status` 返回是否配置以及模型名，不返回密钥。`POST /api/parse-order` 使用 JSON 模式抽取菜品、数量、预约送达时间、客户、联系方式、地址、口味、备注及需要核对的问题。两个 AI API 均保留 Sites 提供的 ChatGPT 登录身份校验。当前本地演示模式不依赖 D1 店铺成员表；若以后恢复云端模式，原成员校验代码仍保留。POST 另有同源检查、请求大小限制及每个运行实例内的简单节流；保留当前仅所有者可访问的站点权限。本地开发通过 starter 的 `/signin-with-chatgpt?return_to=/` 模拟登录。
+`GET /api/ai-status` 返回是否配置以及模型名，不返回密钥。`POST /api/parse-order` 使用 JSON 模式抽取菜品、数量、预约送达时间、客户、联系方式、地址、口味、备注及需要核对的问题。两个 AI API 均保留 Sites 提供的 ChatGPT 登录身份校验。当前本地存储模式不依赖 D1 店铺成员表；若以后恢复云端模式，原成员校验代码仍保留。POST 另有同源检查、请求大小限制及每个运行实例内的简单节流；保留当前仅所有者可访问的站点权限。本地开发通过 starter 的 `/signin-with-chatgpt?return_to=/` 模拟登录。
 
 服务端验证请求和模型结果、恢复菜单中真实的 ID/制作时长，并检查日期格式。菜名含错别字、同音字、简称或近似表述时，AI 会给出合理菜单猜测，保留原文、匹配依据及最多三个有效候选，；绑定别名标为 `alias`，唯一且高度相似的拼写标为 `similar`，两者仅提示、不要求额外勾选，其余不确定建议标为 `guessed`；完全无关的菜品标为 `unmatched`，不强行匹配。匹配分类由服务端结合原文和当前菜单校验，不采信模型自己声明的高置信度；原文证据无法验证时保留待核对。不捏造缺失的地址、联系方式或姓名。
 
@@ -103,7 +103,7 @@ New orders capture materialSnapshot recipes with the local order, including manu
 
 The browser adapter is public/local-workspace.js; public/cloud-api.js retains the prior frontend function boundary but delegates locally without fetch. Accounts use salted PBKDF2 SHA-256 (150,000 iterations), unique login names and per-tab sessions. Administrators can invite, revoke, disable or re-enable local operators. Invite codes are hashed in storage, expire after 24 hours and can be redeemed once in this browser. Business data and audit rows are committed together. Every save checks the store revision. Web Locks serialize writers across tabs when available; a same-context queue and stale-storage check remain as fallback.
 
-Legacy records are read only when the new demo database does not yet exist. A successful original-password login persists their independent demo copy and records a restoration event without changing the original key or historic delivery dates. Corrupt data stops writes; quota failures preserve previously saved records. Separate storage contexts start with separate data. Exports contain business data and exclude account passwords/hashes.
+Legacy records are read only when the new local database does not yet exist. A successful original-password login persists their independent local copy and records a restoration event without changing the original key or historic delivery dates. Corrupt data stops writes; quota failures preserve previously saved records. Separate storage contexts start with separate data. Exports contain business data and exclude account passwords/hashes.
 
 Cloud workspace source and immutable schema history remain for future use, but lib/app-mode.mjs selects LOCAL_DEMO=true and hosting.json declares d1/r2 as null. The cloud workspace route is inactive in this release. Existing remote resources are not deleted by application code; no remote account/data copy is silently claimed. Restoring cloud mode later requires an explicit configuration and migration plan.
 

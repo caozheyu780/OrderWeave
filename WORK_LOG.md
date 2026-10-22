@@ -650,3 +650,27 @@ Future entry format:
 - Cleanup: Owned static and built preview servers are stopped. Removing temporary source-transfer JSON/manifest and feature-edit/audit helper scripts outside the project; retaining the release archive and screenshot. Ignored local preview scripts/state remain outside the source upload.
 - Outcome: Competition demo uses local password-based operator accounts and local menus/photos/orders/logs; same-browser operators share a store and can switch accounts. Cross-device synchronization is explicitly unavailable for this release. Original local records remain usable, and AI extraction retains its authenticated server interface without cloud storage requirements.
 - Logging: Synchronizing this final English release result to GitHub as documentation only; no extra website deployment is required.
+
+### 2026-10-22 19:06:38 +08:00 — Finalize local-demo release logging
+
+- Published final release log commit 8f56a17d519a3f75bbf3a73efb71b7b2131a64ce and verified main matches it. Removed the owned temporary transfer/manifest/edit helper files; retained screenshot, release archive and ignored preview helpers for local reference.
+- Live Site version 13 remains on tested source eaa22f1159717aeb39c829edf45c080693705418 with unchanged audience and provider configuration. All requested local-demo changes are published. This local completion appendix does not cause a recursive log-only commit or redeployment.
+
+### 2026-10-22 19:08:50 +08:00 — Remove competition wording from the interface
+
+- User request: Remove the competition/demonstration branding such as the login badge. Read instructions/log and inspected the active Chinese, English and Malay strings, login/workspace/operator templates and current storage configuration.
+- Action: Replaced the badge with neutral Local storage wording; removed demo language from login titles, storage banners, footers and operator instructions in all three languages. Kept accurate local-only storage and cross-device synchronization limits. Updated the current README heading/copy; historical log entries and compatibility-sensitive storage keys remain intact.
+- Verification: All 388 displayed strings per language were scanned; no competition/demo/demonstration wording remains. No account, storage, permissions, AI, or order logic changed. Preparing the copy-only build and browser review before publication to the same four-user custom audience.
+
+### 2026-10-22 19:09:42 +08:00 — Verify neutral product copy and prepare publication
+
+- The copy-only production build and whitespace checks passed. A fresh-origin browser check confirmed the badge reads Local storage and the heading is Sign in to OrderWeave, with no competition/demo wording. Screenshot: D:/hack/orderweave-login-clean.jpg. No merchant account, menu or order was edited for this check; stopped the owned loopback preview afterward.
+- The full regression suite was not repeated for a translation-only change. All displayed values in Chinese, English and Malay were checked; their 388 keys and existing storage identifiers remain unchanged. Preparing the same-site release with the current custom access policy.
+
+### 2026-10-22 19:11:25 +08:00 — Publish neutral interface wording
+
+- Published copy-only source 8d743a2d25a2046bd116c0899228d9e9348b01da with verified archive D:/hack/orderweave-copy-clean-deploy.tar.gz (397,007 bytes). Saved version 14: appgprj_6ad8c26e2618819193b8337bdb29a5cf~appgver_3731934673108191ac65155df6d3b460.
+- Deployment appgdep_6ad9ef2f5f5c81919bd138d43f16e587 succeeded at 19:11:05 local time. The same URL, four-user custom audience, environment revision 1, local account/storage behavior and AI configuration are preserved.
+- Verification: All Chinese/English/Malay message values are free of competition/demonstration wording; build, whitespace scan and fresh-origin browser inspection passed. Screenshot: D:/hack/orderweave-login-clean.jpg. No merchant data was modified.
+- Preparing the three reviewed source/documentation files for the existing private GitHub repository, preserving all other source and collaborator files. Historical work-log entries remain unchanged.
+
