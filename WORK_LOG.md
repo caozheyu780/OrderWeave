@@ -716,3 +716,10 @@ Future entry format:
 - Packaged and pushed tested source 0256fb8fbd0fa86547ec483a81782d9f2fe654f2 with archive D:/hack/orderweave-store-code-deploy.tar.gz (398,190 bytes). Saved Site version 15: appgprj_6ad8c26e2618819193b8337bdb29a5cf~appgver_5c6b25d756788191bb452620e66a9762.
 - Deployment appgdep_6ad9f2fa07d4819196dc53645b699004 succeeded at 19:27:13 local time on the same Site URL. Preserved the four-user custom audience, environment revision 1, unbound cloud storage and existing server-side AI configuration.
 - The source audit checked all 80 tracked UTF-8 files for accidental runtime data or common credential patterns. Only six source/documentation/test files differ from GitHub main. Preparing the private repository update with its current base tree, retaining all five collaborator-only AI reference files. Browser data, photos, secrets, screenshots and deployment archives are not uploaded to GitHub.
+
+
+### 2026-10-22 19:28:21 +08:00 — Verify GitHub synchronization and complete release
+
+- Updated private GitHub main to 29bc988a1dc20b3eb12b5905269948a54979d3f5 using its expected prior head without force. Verified all 80 local source file blob hashes against tree 5356c612249fe6467e322e35be2b4fe4ec867bca, plus all five retained collaborator-only reference files (85 total). Branch readback confirmed the new commit.
+- Refreshed the live Site deliverable tab. It retains its existing ChatGPT access gate; no production merchant session or data was opened. Native deployment success verifies version 15 publication; local browser checks cover account/code/log UI and the full regression suite covers behavior. No real AI call was required for this membership/log-only change.
+- Stopped the owned loopback preview (the execution host terminated its plain process; no teardown counters were emitted). Removing only this turn's temporary edit/transfer/audit helper files. Retaining D:/hack/orderweave-accounts.jpg and the release archive. Synchronizing this final English release entry without a documentation-only Site redeployment.
