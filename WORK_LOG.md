@@ -444,3 +444,52 @@ Future entry format:
 - Privacy result: No browser localStorage/session/profile, saved merchant menu/order/photo export, API key, ignored environment file, runtime database, build output or deployment archive was uploaded. Fictional source/test examples are included. Only the current reviewed source snapshot was imported; local historical Git commits were not pushed.
 - Local changes: Added defensive ignore patterns and documented the source/runtime-data distinction in README. The published website, Sites private access and runtime secrets were not changed. No build or deployment was run for these documentation/ignore changes.
 - Logging: Appended the upload and verification outcome; synchronizing this work-log result as a documentation follow-up in the same repository.
+
+### 2026-10-22 10:56:27 +08:00 — Finalize GitHub upload logging
+
+- Action: Published the upload/verification work-log entry in documentation commit e335ca9a63e9d48769048b85eb8711f56948a362. Read back main and the work-log blob; both matched the expected commit/content SHA. Repository remains the verified private caozheyu780/OrderWeave destination.
+- Cleanup: Removing the temporary reviewed-source transfer JSON and hash manifest outside the project. Source/documentation are on GitHub; local README/ignore/log changes remain available for the next Sites source synchronization. No runtime data, secret or website deployment changed.
+- This local completion appendix records the logging operation without recursively committing another log-only update.
+
+### 2026-10-22 11:05:27 +08:00 — Implement half-hour delivery windows
+
+- Action: Read project instructions/log, scheduling/validation/extraction/UI code, tests and current Sites workflow. Verified OrderWeave remains owner-private and opened its source workflow. Preserved the prior GitHub preparation changes in the working tree.
+- User requirement: Replace a single scheduled delivery time with a half-hour window, automatically match text-import times, and let merchants choose windows manually.
+- Rule: A point time maps to its containing clock-aligned half hour (12:20 -> 12:00–12:30; 12:30 -> 12:30–13:00). An explicit range must fit in one half-hour window; wider/unclear ranges remain unscheduled with a review warning. Midnight end times carry the following date.
+- Action: Added shared pure delivery-window/date/parser helpers; normalized AI/rule imports and batch persistence; added date plus 48-window selectors for manual/edit/import forms; updated list/details/confirmation displays and Chinese/English/Malay labels. Preserved original recognized times for comparison.
+- Compatibility: Existing point-time records display as containing windows without rewriting browser storage on load. New or edited orders persist explicit start/end fields. Storage keys, existing records and merchant data remain local.
+- Status: Implementation and regression verification in progress; no release or GitHub source update performed yet.
+
+### 2026-10-22 11:07:22 +08:00 — Verify delivery-window logic
+
+- Result: Initial 63 tests passed, including 11 new scheduling tests for clock boundaries, midnight/month/year/leap-day transitions, 48 unique manual options, invalid dates, range containment, legacy non-mutating display, multilingual basic parsing, AI normalization, independent batches and persisted start/end validation.
+- Action: Added explicit 23:30–24:00 basic-rule support and strengthened the actual workerd transport regression to assert point-to-window mapping and next-day endpoints. Updated the Worker module fixture for the shared delivery helper.
+- Action: Prepared a loopback-only simulated API fixture for a 12:20 point, a 23:50 point and a crossing 12:15–12:45 range. Browser checks will exercise the real frontend without provider credentials or production merchant data.
+- Status: Running final checks/build and browser validation.
+
+### 2026-10-22 11:11:01 +08:00 — Verify manual and imported delivery windows in the browser
+
+- Browser check: Existing fictional orders still loaded (seven active) and displayed half-hour windows. Manually added a date/23:30–00:00 slot; reload retained the eighth order and the next-day label. Editing restored that date and slot selection.
+- Browser check: A simulated three-order import mapped 12:20 to 12:00–12:30 and 23:50 to 23:30–00:00 next day. A 12:15–12:45 range remained unset with a localized warning and disabled batch addition. The merchant could select 12:30–13:00 to resolve it while retaining the original range for reference.
+- Confirmation check: Canceling final confirmation left eight active orders. Confirming afterward added exactly three; reload retained eleven active records with the expected windows. Test data stayed on loopback only.
+- Language check: Malay date/slot labels, 48 options and next-day wording rendered correctly. Three-language dictionaries have 236 matching keys. No browser console errors were observed.
+- Evidence: D:/hack/orderweave-delivery-slots.jpg, replaced an initially scrolled capture with the top-of-form date/window view. Updated README with slot rules and compatibility behavior.
+- Checks: 63 tests, syntax/type checking, production build and whitespace checks passed. Preparing final provider-result review and publication.
+
+### 2026-10-22 11:11:45 +08:00 — Validate real AI time extraction and prepare release
+
+- Real provider check: Invoked the actual extraction library in workerd against the official DeepSeek endpoint with three fictional orders. HTTP 200 and all delivery-slot assertions passed. 12:20 became 12:00–12:30; 23:50 became 23:30–00:00 on the following date; 12:15–12:45 retained both original endpoints, left the delivery slot unset and returned a review warning.
+- Security: The existing provider key was passed through hidden stdin and memory only. No live merchant menu/order/customer data was used, and no credential was saved to source or logs.
+- Release checks: 63 tests, syntax/type checks, production build, three-language dictionary parity (236 keys), local browser manual/import/review/cancel/confirm/reload cases and whitespace checks passed. Existing records are not migrated on read.
+- Action: Refreshed Sites source access, rechecked the connected GitHub repository's private visibility and current main branch before preparing source publication. Website secrets and audience remain unchanged.
+
+### 2026-10-22 11:13:57 +08:00 — Publish half-hour delivery windows
+
+- Action: Synchronized source and packaged the verified build, then deployed to the same owner-private Site with existing environment revision 1.
+- Source commit: b0501d2ff32db08c509d48c02b9f088a82676302.
+- Saved version: appgprj_6ad8c26e2618819193b8337bdb29a5cf~appgver_f81959cb1e508191816d5877a860e776.
+- Deployment: appgdep_6ad97f2f747881919c2f67576c03ab9c — succeeded at 11:13:10 local time.
+- Website: https://takeaway-desk-cao-1021.crispthyme35.chatgpt.site/ . Source storage keys, authentication, private access and runtime secrets are unchanged.
+- Tool correction: The source helper completed successfully but PTY wrapping inserted control characters into its final JSON. Verified the exact commit via git rev-parse and the returned archive path/size before invoking publication. No rebuild or duplicate source publication was needed.
+- Verification summary: 63 tests, type/syntax checks, build, browser compatibility/manual/import/final-confirmation/persistence checks and real DeepSeek point/range extraction passed. Screenshot: D:/hack/orderweave-delivery-slots.jpg.
+- GitHub synchronization: The existing private repository main still matches the previously verified documentation commit e335ca9a63e9d48769048b85eb8711f56948a362. Preparing an audited source-only update; no merchant records, images, browser storage or credentials are included.

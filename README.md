@@ -76,3 +76,11 @@ The first-run language chooser and the existing language selector support 简体
 ## Project identity
 
 OrderWeave is the product name across Chinese, English and Malay. The Site display title, browser metadata, app wordmark, login introduction and project package name use OrderWeave. New exports are named orderweave-backup-YYYY-MM-DD.json and include application: OrderWeave. Existing browser storage/session keys, backup format identifier, Site project ID and deployed URL retain their established values for data compatibility. Historical work-log entries retain the names that were current when recorded.
+
+## Half-hour delivery windows
+
+Delivery scheduling uses a date plus one of 48 daily half-hour slots. New and edited orders store scheduledAt as the slot start and scheduledEndAt as its end. A point such as 12:20 maps to 12:00–12:30; an exact 12:30 maps to 12:30–13:00. The 23:30–00:00 window ends on the following calendar day.
+
+DeepSeek extracts the actual requested start/end; shared server rules assign a containing slot. Explicit ranges must fit in a single slot. A range such as 12:15–12:45 or 12:00–13:00 is left unresolved with a warning, requiring the merchant to choose. Basic-rule text import follows the same rule for supported clock expressions. Original recognized times are retained for review; all imported orders still require final merchant confirmation.
+
+Legacy orders with only a point scheduledAt display as their containing windows without modifying localStorage during page load. Editing/saving or confirming new imports persists explicit start/end fields. List/detail/confirmation views and the date/slot selectors are localized in Chinese, English and Malay.

@@ -41,3 +41,11 @@ const recognitionSystemKeys=new Map([
   ['预约时间无法确认，请手动填写 / Please check the delivery time.','systemTimeWarning']
 ]);
 export function recognitionText(value,language){const text=String(value??''),key=recognitionSystemKeys.get(text);return key?messages[resolveLanguage(language)][key]:text;}
+
+Object.assign(messages.zh,{"scheduled":"预定送达时段","missingTime":"请选择有效的送达日期和半小时时间段。","deliveryDate":"送达日期","deliverySlot":"送达时间段","chooseDeliverySlot":"选择半小时时间段","deliverySlotHint":"每个时段为30分钟。12:20自动归入12:00–12:30；12:30归入12:30–13:00。","nextDay":"次日","originalSchedule":"原文 / 原预定时间","slotReviewWarning":"送达范围跨越多个半小时时段，或时间无法确认，请选择一个送达时段。"});
+
+Object.assign(messages.en,{"scheduled":"Scheduled delivery window","missingTime":"Choose a valid delivery date and half-hour window.","deliveryDate":"Delivery date","deliverySlot":"Delivery window","chooseDeliverySlot":"Choose a half-hour window","deliverySlotHint":"Each window lasts 30 minutes. 12:20 maps to 12:00–12:30; 12:30 maps to 12:30–13:00.","nextDay":"next day","originalSchedule":"Original requested / scheduled time","slotReviewWarning":"The requested range spans multiple half-hour windows or is unclear. Choose one delivery window."});
+
+Object.assign(messages.ms,{"scheduled":"Slot penghantaran dijadualkan","missingTime":"Pilih tarikh penghantaran dan slot setengah jam yang sah.","deliveryDate":"Tarikh penghantaran","deliverySlot":"Slot penghantaran","chooseDeliverySlot":"Pilih slot setengah jam","deliverySlotHint":"Setiap slot ialah 30 minit. 12:20 dipadankan dengan 12:00–12:30; 12:30 dengan 12:30–13:00.","nextDay":"hari berikutnya","originalSchedule":"Masa asal diminta / dijadualkan","slotReviewWarning":"Julat masa meliputi beberapa slot setengah jam atau tidak jelas. Pilih satu slot penghantaran."});
+
+recognitionSystemKeys.set('送达时间范围无法归入单个半小时时段，请手动选择 / Select a single half-hour delivery slot.','slotReviewWarning');

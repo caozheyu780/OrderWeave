@@ -10,3 +10,5 @@
 .match-notice{grid-column:1/-1;border-left:3px solid var(--green);background:var(--soft);padding:12px 14px;font-size:13px;line-height:1.7;margin:10px 0}.match-notice p{margin:5px 0 0}.dish-aliases{overflow-wrap:anywhere}.aliases-hint{font-size:12px;margin-top:-10px}.batch-ready{font-size:13px;color:var(--muted);margin:16px 0}
 
 .lang-control{max-width:175px}
+
+.schedule-hint{font-size:12px;line-height:1.7;margin-top:-6px}
