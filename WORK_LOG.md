@@ -774,3 +774,38 @@ Future entry format:
 - Refreshed the existing Site deliverable tab; the unchanged ChatGPT access gate loaded. No production merchant or buyer runtime record was opened or modified. Native deployment success confirms version 16 publication; the complete local buyer-to-merchant browser flow and 94 passing regression tests provide functional evidence.
 - Stopped the owned localhost preview; the host terminated the plain process without emitting teardown counters. Retaining the deployment archive and four QA screenshots, including D:/hack/orderweave-buyer-menu.jpg. Removing only this turn's temporary edit/audit/transfer helper files. No browser merchant or buyer records are deleted.
 - The delivered system remains local-only, with dated CNY reference display and explicitly simulated wallet/card payment or cash due. Real charging, SMS verification and cross-device synchronization are not configured. Syncing this final English release log does not require another Site deployment.
+
+
+### 2026-10-23 12:24:37 +08:00 — Final buyer-release verification
+
+- Read back final private GitHub main at c4d6ddbffeff30b33a53e5fcd7517b7a7f3d2882. Only the expected local work-log completion appendix remains uncommitted after helper cleanup. Published Site version 16 stays on checked source 6c4e9a5485bdb80f642b4bcde6d0a02fa7b1376e. This appendix causes no recursive log-only commit or redeployment.
+
+
+### 2026-10-23 14:11:28 +08:00 — Investigate attached issue report
+
+- Read project instructions, work log and the supplied legacy Word report without changing the attachment. Extracted its text and two embedded screenshots using a bounded read-only OLE/Word parser in a temporary helper; inspected both images. The requested issues are focus borders overlapping nested field labels and a shareable merchant menu export for group chats.
+- Traced the overlap to outward focus outlines and missing separation between nested labels/inputs in buyer profile and catalog pricing forms. Planning an inset focus indication plus label/control spacing, retaining visible keyboard focus.
+- Planning a dedicated menu-page PNG/PDF export with photos, prices/categories, optional descriptions/options and a preview. Business-data JSON backup remains separate; buyer accounts, orders and credentials must never enter a public menu export.
+- Initial extraction checked available bundled document tooling: olefile is absent, and a console preview hit the Windows GBK encoding limit. The read-only custom parser with UTF-8 output successfully recovered the report; no package installation or document authoring was needed. Reopened the same Site workflow and retained its custom audience/local storage configuration.
+
+
+### 2026-10-23 14:50:39 +08:00 — Verify focus fixes and real menu files
+
+- Implemented inset text-control focus and explicit spacing for nested labels; retained button/checkbox keyboard focus and a forced-color outline. Browser comparison confirmed the category and buyer username fields no longer overlap their labels. No field values or merchant/buyer data were saved during these checks. Evidence: D:/hack/orderweave-focus-fixed.jpg and D:/hack/orderweave-profile-focus-fixed.jpg.
+- Added a dedicated merchant menu export action, public-field snapshot, local canvas preview/PNG, all-pages raster PDF writer, selection/content controls, continuation pagination, 100-page safeguard, missing-image placeholders and localized Chinese/English/Malay messages. Small PNG pages crop excess bottom whitespace; PDF retains A4 size. Neither account/customer/order data nor internal recipes/aliases enter the snapshot. Documented the workflow and PDF text-selection limitation in README.md.
+- All 100 regression tests passed, including six new tests for public-field privacy, content toggles, multilingual wrapping, large-menu pagination, binary PDF stream/xref correctness and filenames. TypeScript, syntax and whitespace checks passed. Browser QA confirmed empty-selection blocking, preview rendering, both download actions and the actual focus fix. No production data was used.
+- Download verification returned successfully after an unusually long browser-tool wait (about 32 minutes); no repeated download calls were issued. Copied the fictional output to D:/hack/orderweave-menu-export-qa.png and D:/hack/orderweave-menu-export-qa.pdf. Pillow verified a 1240x640 PNG. pypdf read the one-page A4 PDF; pypdfium2 rendered it, and the resulting page image was visually inspected with clear Chinese text, prices, options and footer. Saved D:/hack/orderweave-menu-export-pdf-page.png and D:/hack/orderweave-menu-export-preview.jpg. Preparing final build/publication; no real AI/payment/provider call is required.
+
+
+### 2026-10-23 14:51:03 +08:00 — Build reported fixes for release
+
+- Final production build completed successfully after compact PNG/public-title refinements. Syntax and whitespace checks passed, and all three combined dictionaries contain the same 514 keys. Earlier full regression suite passed all 100 tests; no application source changed after this build.
+- Refreshed the source credential after the long browser download wait; kept it in memory. Confirmed private GitHub main remains c4d6ddbffeff30b33a53e5fcd7517b7a7f3d2882. Preparing exact-source packaging and a base-tree GitHub update, retaining collaborator reference files.
+- Original attached report remains untouched. Temporary parsing helpers/extracted report images and generated QA files stay outside the repository. No runtime merchant/buyer record or secret is part of this release source.
+
+
+### 2026-10-23 14:53:14 +08:00 — Publish focus and public menu export fixes
+
+- Packaged and pushed tested source cdf794c29b64e7ca6f6b41b1da3d8db07c5b3295 with archive D:/hack/orderweave-menu-export-deploy.tar.gz (420,881 compressed bytes). Saved Site version 17: appgprj_6ad8c26e2618819193b8337bdb29a5cf~appgver_72a9d5912bc88191b72facd82add0040.
+- Deployment appgdep_6adb0426ad10819182404875d684e23a succeeded at 14:52:45 local time on the same Site URL. Kept the existing custom four-user audience, environment revision 1, local storage mode and provider configuration.
+- Audited all 90 tracked UTF-8 source files for accidental runtime/binary files and common credential patterns. Preparing eight changed files for private GitHub main while preserving the five collaborator-only reference files. The attachment, extracted screenshots, generated menu PNG/PDF, browser records and credentials remain excluded from GitHub source.

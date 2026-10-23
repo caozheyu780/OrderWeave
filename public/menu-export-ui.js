@@ -1,0 +1,41 @@
+import {publicMenu,layoutMenu,menuPdf,menuFilename,MENU_PAGE} from './menu-export.js';
+import {localDateTime} from './core.js';
+const font=(size,weight='400')=>`${weight} ${size}px "Microsoft YaHei", "Segoe UI", sans-serif`;
+async function loadPhoto(src){if(!src)return null;const img=new Image();img.src=src;try{await img.decode();return img.naturalWidth&&img.naturalHeight?img:null;}catch{return null;}}
+export async function drawMenuPage(page,{t,locale,index,total,cny,paper=false}){
+ const canvas=document.createElement('canvas');canvas.width=MENU_PAGE.width;canvas.height=paper?MENU_PAGE.height:Math.min(MENU_PAGE.height,Math.max(640,(page.entries.at(-1)?.y||0)+(page.entries.at(-1)?.height||0)+150));const c=canvas.getContext('2d'),M=MENU_PAGE.margin;
+ c.fillStyle='#fff';c.fillRect(0,0,canvas.width,canvas.height);c.textBaseline='top';c.fillStyle='#20624b';c.fillRect(M,52,48,6);c.font=font(21,'600');c.fillText('OrderWeave · '+t('menuPublicTitle'),M,82);
+ c.fillStyle='#24372f';c.font=font(44,'600');page.shopLines.forEach((line,i)=>c.fillText(line,M,122+i*54));
+ for(const entry of page.entries){const {dish,y,height,lines}=entry;const photo=await loadPhoto(dish.image),x=M,box=184;
+  if(photo){const scale=Math.max(box/photo.naturalWidth,box/photo.naturalHeight),w=photo.naturalWidth*scale,h=photo.naturalHeight*scale;c.save();c.beginPath();c.rect(x,y+16,box,box);c.clip();c.drawImage(photo,x+(box-w)/2,y+16+(box-h)/2,w,h);c.restore();}
+  else{c.fillStyle='#edf3ec';c.fillRect(x,y+16,box,box);c.fillStyle='#768078';c.font=font(20);c.fillText(t('menuImageMissing'),x+14,y+88,box-28);}
+  let textY=y+16;for(const line of lines){c.font=font(line.size,line.size>=28?'600':'400');c.fillStyle=line.color;c.fillText(line.text,M+224,textY);textY+=line.gap;}
+  c.strokeStyle='#e0e5de';c.lineWidth=1;c.beginPath();c.moveTo(M,y+height);c.lineTo(canvas.width-M,y+height);c.stroke();
+ }
+ const footerY=canvas.height-90;c.fillStyle='#768078';c.font=font(18);c.fillText(page.generatedDate,M,footerY);c.textAlign='right';c.fillText((index+1)+' / '+total,canvas.width-M,footerY);c.textAlign='left';
+ if(cny){c.font=font(17);c.fillText(t('menuFxFooter')+' '+page.fxDate,M,footerY+32,canvas.width-2*M);}
+ return canvas;
+}
+function canvasBlob(canvas,type='image/png',quality){return new Promise((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(Error('MENU_EXPORT_FAILED')),type,quality));}
+function download(blob,name){const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),30000);}
+export function openMenuExport({account,modal,t,e,locale,openModal,toast}){
+ if(!account.menu.length){toast(t('menuExportEmpty'));return;}
+ openModal(t('menuExportTitle'),`<form id="menu-export-form"><div class="modal-body"><p>${t('menuExportHelp')}</p><label class="inline-check"><input type="checkbox" id="menu-export-all" checked>${t('menuExportSelectAll')}</label><div class="menu-export-selection">${account.menu.map(d=>`<label class="inline-check"><input type="checkbox" name="dish" value="${e(d.id)}" checked><span>${e(d.name)}</span></label>`).join('')}</div><fieldset><legend>${t('menuExportContent')}</legend>${[['description',t('dishDescription')],['options',t('optionsTitle')],['cny',t('menuExportCny')]].map(([key,label])=>`<label class="inline-check"><input type="checkbox" name="${key}" checked>${label}</label>`).join('')}</fieldset><p class="error" id="menu-export-error" role="alert"></p><button type="submit" class="primary">${t('menuExportPreview')}</button></div></form>`);
+ const form=modal.querySelector('form');form.querySelector('#menu-export-all').addEventListener('change',event=>{for(const box of form.querySelectorAll('[name=dish]'))box.checked=event.target.checked;});
+ form.addEventListener('change',event=>{if(event.target.name==='dish'){const boxes=[...form.querySelectorAll('[name=dish]')],all=form.querySelector('#menu-export-all');all.checked=boxes.every(b=>b.checked);all.indeterminate=!all.checked&&boxes.some(b=>b.checked);}});
+ form.addEventListener('submit',async event=>{event.preventDefault();const f=new FormData(form);try{const model=publicMenu(account,{ids:f.getAll('dish'),description:f.has('description'),options:f.has('options'),cny:f.has('cny')});await preview(model);}catch(error){const box=modal.querySelector('#menu-export-error');if(box)box.textContent=t(error.message==='MENU_EXPORT_EMPTY'?'menuExportEmpty':error.message==='MENU_EXPORT_LIMIT'?'menuExportLimit':'menuExportFailed');}});
+ async function preview(model){
+  await document.fonts.ready;if(!modal.open||!modal.contains(form))return;const measure=document.createElement('canvas').getContext('2d'),date=localDateTime(new Date()).slice(0,10),pages=layoutMenu(model,{measure:(text,size)=>{measure.font=font(size,size>=28?'600':'400');return measure.measureText(text).width;},t,locale,generatedDate:date}).map(p=>({...p,fxDate:model.fxDate}));
+  openModal(t('menuExportPreview'),`<div class="modal-body" id="menu-export-preview"><p>${t('menuExportPreviewHelp')}</p><div class="row between wrap"><button type="button" data-menu-page="-1">${t('menuExportPrevious')}</button><b id="menu-export-page"></b><button type="button" data-menu-page="1">${t('menuExportNext')}</button></div><p role="status" id="menu-export-status"></p><img id="menu-export-image" alt="${t('menuExportPreview')}" class="hidden"><div class="row wrap menu-export-downloads"><button type="button" id="menu-export-png" class="primary">${t('menuExportPng')}</button><button type="button" id="menu-export-pdf">${t('menuExportPdf')}</button></div><p class="error" role="alert" id="menu-export-download-error"></p></div>`);
+  const container=modal.querySelector('#menu-export-preview'),status=container.querySelector('#menu-export-status'),image=container.querySelector('img'),buttons=[...container.querySelectorAll('button')];let page=0,canvas=null,url=null,busy=false;
+  const active=()=>modal.open&&modal.querySelector('#menu-export-preview')===container;
+  const error=err=>{container.querySelector('#menu-export-download-error').textContent=t(err.message==='MENU_EXPORT_LIMIT'?'menuExportLimit':'menuExportFailed');};
+  const controls=()=>{buttons.forEach(b=>b.disabled=busy);container.querySelector('[data-menu-page="-1"]').disabled=busy||page===0;container.querySelector('[data-menu-page="1"]').disabled=busy||page===pages.length-1;};
+  async function showPage(){busy=true;controls();status.textContent=t('menuExportRendering');try{const next=await drawMenuPage(pages[page],{t,locale,index:page,total:pages.length,cny:model.cny}),blob=await canvasBlob(next);if(!active())return;canvas=next;if(url)URL.revokeObjectURL(url);url=URL.createObjectURL(blob);image.src=url;image.classList.remove('hidden');container.querySelector('#menu-export-page').textContent=(page+1)+' / '+pages.length;status.textContent='';}catch(err){error(err);}finally{busy=false;controls();}}
+  for(const b of container.querySelectorAll('[data-menu-page]'))b.addEventListener('click',()=>{page+=Number(b.dataset.menuPage);showPage();});
+  container.querySelector('#menu-export-png').addEventListener('click',async()=>{if(busy||!canvas)return;busy=true;controls();try{const blob=await canvasBlob(canvas);if(active())download(blob,menuFilename(model.shop,page,'png',date));}catch(err){error(err);}finally{busy=false;controls();}});
+  container.querySelector('#menu-export-pdf').addEventListener('click',async()=>{if(busy)return;busy=true;controls();try{const jpegs=[];for(let i=0;i<pages.length;i++){if(!active())return;status.textContent=t('menuExportRendering')+' '+(i+1)+' / '+pages.length;const rendered=await drawMenuPage(pages[i],{t,locale,index:i,total:pages.length,cny:model.cny,paper:true}),blob=await canvasBlob(rendered,'image/jpeg',.94);jpegs.push({bytes:new Uint8Array(await blob.arrayBuffer()),width:rendered.width,height:rendered.height});await new Promise(requestAnimationFrame);}if(active())download(menuPdf(jpegs),menuFilename(model.shop,0,'pdf',date));}catch(err){error(err);}finally{status.textContent='';busy=false;controls();}});
+  const cleanup=()=>{if(active())return;if(url){URL.revokeObjectURL(url);url=null;}canvas=null;modal.removeEventListener('close',cleanup);};modal.addEventListener('close',cleanup);
+  await showPage();
+ }
+}

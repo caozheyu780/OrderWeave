@@ -18,6 +18,14 @@ Buyer and merchant sessions are separate so switching portals retains the corres
 
 GitHub 源码仓库：[caozheyu780/OrderWeave](https://github.com/caozheyu780/OrderWeave)（私有）。
 
+## Share a menu in group chats
+
+In the merchant menu page, choose **Export menu**, select the dishes and optionally include descriptions, option surcharges and indicative CNY prices. Preview before downloading. **PNG downloads the current page** as a compact, high-resolution image; use the previous/next controls for longer menus. **PDF downloads every page** in an A4 document. Long descriptions and options continue on additional pages rather than being cut off. Exports above 100 pages ask the merchant to select fewer dishes or omit details and export in batches.
+
+The export includes only the shop name, selected dish names/photos/categories/prices and the chosen public details. It excludes customer/order records, member accounts, credentials, aliases and internal material recipes. Existing business-data JSON backup remains a separate action. Exporting or canceling does not modify menus, orders or browser records. File generation runs locally in the browser, without uploading menu photos or customer data. The PDF uses raster pages to keep Chinese/English/Malay text and photos consistent with the preview; its text is not selectable. Missing or unreadable dish images use a visible placeholder, and unpriced dishes say that their price is to be confirmed.
+
+Nested form labels now have explicit spacing above controls. Text field, textarea and select focus indicators stay inside their borders so they cannot overlap the label; keyboard and forced-color focus remain visible.
+
 ## Current mode: browser-local storage
 
 This release uses browser-local accounts and storage. D1/R2 bindings are disabled, and the frontend does not call the cloud workspace API. Separate local operator accounts share a store in the same browser and website origin; different devices/browsers do not synchronize. AI extraction still uses the existing authenticated server endpoint and provider secret.
