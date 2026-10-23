@@ -16,7 +16,7 @@ OrderWeave 是面向小型餐饮店铺的菜单、外卖订单与配送管理平
 
 ## Buyer ordering (browser-local)
 
-Dish descriptions and preparation times are optional in manual entry, edits and AI menu review. Blank times are stored as `null`; a provided time must be a whole number from 1 to 1,440 minutes. Menu/catalog views show that the time is not provided. Order and kitchen estimates sum known times and flag incomplete estimates, while existing orders keep their original time snapshots.
+Dish photos, descriptions and preparation times are optional in manual entry, edits and AI menu review. Missing photos are stored as an empty string and rendered with a local blank placeholder; existing photos can be removed in the dish form. Blank times are stored as `null`; a provided time must be a whole number from 1 to 1,440 minutes. Menu/catalog views show that the time is not provided. Order and kitchen estimates sum known times and flag incomplete estimates, while existing orders keep their original time snapshots.
 
 The sign-in screen offers Buyer sign-in and the merchant portal. Buyers use a phone number and a password (6–200 characters). A new phone number automatically creates a local buyer account; an existing number requires its original password. There is no SMS verification or password recovery service. Buyer passwords use the same salted PBKDF2 hashing as merchant accounts. The first sign-in opens profile setup with a random alphanumeric display name and an optional photo; leaving the photo blank uses a neutral blank avatar. Photos are resized locally. Phone numbers, profiles, addresses and carts remain browser runtime data and are excluded from source uploads.
 

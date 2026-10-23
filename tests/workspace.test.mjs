@@ -9,6 +9,7 @@ test('workspace accepts absent preparation times while rejecting invalid supplie
  const dish={id:'rice',name:'Rice',description:'',image:'data:image/png;base64,YQ==',ingredients:[{name:'Rice',quantity:100,unit:'g'}]};
  for(const minutes of [null,undefined])assert.equal(validateWorkspaceData({menu:[{...dish,minutes}],orders:[]}).menu[0].minutes,null);
  for(const minutes of [0,-1,1.5,1441,''])assert.throws(()=>validateWorkspaceData({menu:[{...dish,minutes}],orders:[]}),e=>e.code==='INVALID_DATA');
+ for(const image of ['',null,undefined])assert.equal(validateWorkspaceData({menu:[{...dish,image}],orders:[]}).menu[0].image,'');
 });
 const files=['public/import-limits.js','lib/workspace.mjs','public/core.js','public/menu-matching.js','public/delivery-slots.js','public/materials.js','public/merchant-operations.js','public/commerce.js'];
 export async function createWorkspaceRuntime(){
@@ -17,6 +18,18 @@ export async function createWorkspaceRuntime(){
  const db=await runtime.getD1Database('DB');for(const file of (await readdir('drizzle')).filter(f=>f.endsWith('.sql')).sort()){const sql=await readFile('drizzle/'+file,'utf8');for(const statement of sql.split('--> statement-breakpoint').map(x=>x.trim()).filter(Boolean))await db.prepare(statement).run();}
  return {runtime,db};
 }
+
+test('actual D1/R2 preserves an empty photo without requiring a stored image',async()=>{
+ const {runtime}=await createWorkspaceRuntime();
+ async function call(input,query=''){const response=await runtime.dispatchFetch('https://test.local/api/workspace'+query,{method:input?'POST':'GET',headers:{'x-test-user':'photo-owner',Origin:'https://test.local','Content-Type':'application/json'},...(input?{body:JSON.stringify(input)}:{})});return {status:response.status,data:await response.json()};}
+ try{
+  const created=await call({action:'create',shop:'Fictional photo-free shop',operatorName:'Photo owner'});
+  const dish={id:'rice',name:'Rice',description:'',minutes:null,ingredients:[{name:'Rice',quantity:100,unit:'g'}]};
+  const saved=await call({action:'save',merchantId:created.data.id,expectedRevision:0,menu:[dish],orders:[]});assert.equal(saved.status,200);assert.equal(saved.data.menu[0].image,'');
+  const reloaded=await call(null,'?merchantId='+created.data.id);assert.equal(reloaded.data.menu[0].image,'');
+  const invalid=await call({action:'save',merchantId:created.data.id,expectedRevision:saved.data.revision,menu:[{...dish,image:'https://example.com/photo.png'}],orders:[]});assert.equal(invalid.status,400);
+ }finally{await runtime.dispose();}
+});
 test('actual D1/R2 workspace: identities, shared stores, atomic revisions, logs and invitations',async()=>{
  const {runtime,db}=await createWorkspaceRuntime();
  async function call(user,input,query=''){const response=await runtime.dispatchFetch('https://test.local/api/workspace'+query,{method:input?'POST':'GET',headers:{...(user?{'x-test-user':user}:{}),Origin:'https://test.local','Content-Type':'application/json'},...(input?{body:JSON.stringify(input)}:{})});return {status:response.status,data:await response.json()};}

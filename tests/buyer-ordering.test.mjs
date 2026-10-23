@@ -13,10 +13,12 @@ const line={dishId:'dish',selections:{size:['large'],extras:['egg']},quantity:2,
 async function fixture(){const storage=new Storage(),api=()=>createLocalWorkspace({storage,sessionStorage:new Storage(),now}),merchant=api(),m=await merchant.request(owner);await merchant.request({action:'save',merchantId:m.id,expectedRevision:0,menu:[dish],orders:[]});const buyer=api();await buyer.request(login);return {storage,api,merchant,buyer,id:m.id};}
 async function cart(f){await f.buyer.request({action:'buyer_cart_add',storeId:f.id,...line});await f.buyer.request({action:'buyer_address',name:'Fictional buyer',phone:login.phone,location:'Fictional street 1'});const state=await f.buyer.request({action:'buyer_state'}),quote=await f.buyer.request({action:'buyer_quote'});return {state,quote,input:{action:'buyer_checkout',requestId:'checkout-test',quoteToken:quote.quoteToken,addressId:state.profile.addresses[0].id,scheduledAt:'2026-10-24T12:00',scheduledEndAt:'2026-10-24T12:30',paymentMethod:'local_wallet'}};}
 
-test('unknown preparation time persists through buyer checkout and merchant acceptance',async()=>{
+test('optional photo and unknown preparation time persist through buyer checkout and acceptance',async()=>{
  const f=await fixture();let state=await f.merchant.request({},'?merchantId='+f.id);
- const menu=[{...state.menu[0],minutes:null}];state=await f.merchant.request({action:'save',merchantId:f.id,expectedRevision:state.revision,menu,orders:[]});
- assert.equal(state.menu[0].minutes,null);
+ const menu=[{...state.menu[0],minutes:null,image:''}];state=await f.merchant.request({action:'save',merchantId:f.id,expectedRevision:state.revision,menu,orders:[]});
+ assert.equal(state.menu[0].minutes,null);assert.equal(state.menu[0].image,'');
+ assert.equal((await f.buyer.request({action:'buyer_state'})).stores[0].menu[0].image,'');
+ for(const image of [123,'https://example.com/photo.png','data:image/svg+xml;base64,YQ=='])await assert.rejects(f.merchant.request({action:'save',merchantId:f.id,expectedRevision:state.revision,menu:[{...menu[0],image}],orders:[]}),/INVALID_DATA/);
  for(const minutes of [0,-1,1.5,1441,''])await assert.rejects(f.merchant.request({action:'save',merchantId:f.id,expectedRevision:state.revision,menu:[{...menu[0],minutes}],orders:[]}),/INVALID_DATA/);
  const checkout=await cart(f);await f.buyer.request(checkout.input);
  state=await f.merchant.request({},'?merchantId='+f.id);const order=state.orders[0];assert.equal(order.items[0].minutes,null);assert.deepEqual(preparationEstimate(order),{minutes:0,incomplete:true});
