@@ -1,5 +1,6 @@
 import { env } from 'cloudflare:workers';
 import { AIError, extractOrder } from '../../../lib/deepseek.mjs';
+import { extractMenu } from '../../../lib/menu-extraction.mjs';
 import { getChatGPTUser } from '../../chatgpt-auth';
 import {LOCAL_DEMO} from '../../../lib/app-mode.mjs';
 export const dynamic = 'force-dynamic';
@@ -26,7 +27,7 @@ export async function POST(request: Request) {
     let input; try {input = JSON.parse(new TextDecoder().decode(bytes));} catch {throw new AIError('INVALID_REQUEST',400);}
     if(!LOCAL_DEMO){const member = env.DB && typeof input.merchantId==='string' && await env.DB.prepare('SELECT id FROM members WHERE store_id=? AND user_id=? AND disabled=0').bind(input.merchantId,user.userId).first();
     if(!member) return Response.json({error:'AUTH_REQUIRED'}, {status:403,headers:{'Cache-Control':'no-store'}});}
-    const result = await extractOrder(input, env);
+    const result = input.kind==='menu'?await extractMenu(input, env):await extractOrder(input, env);
     return Response.json(result, {headers:{'Cache-Control':'no-store'}});
   } catch (error) {
     const known = error instanceof AIError;

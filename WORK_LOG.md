@@ -817,3 +817,49 @@ Future entry format:
 - Refreshed the existing Site deliverable tab and confirmed its unchanged ChatGPT access gate. No production merchant/buyer session or runtime record was opened or changed. Native publication succeeded for version 17; local visual comparisons, real PNG/PDF downloads and PDF rendering provide the feature evidence.
 - Stopped the owned loopback preview; its plain process was terminated by the host without teardown counters. Removing only this turn's temporary integration/audit/transfer/parser helpers and extracted copies of the two report images. The supplied Word attachment remains untouched; generated QA screenshots/menu files and the release archive remain in D:/hack outside the source checkout. No browser business data was deleted.
 - Synchronizing this final English release log. The two requested fixes are complete; a documentation-only log update does not require another Site deployment.
+
+
+### 2026-10-23 14:54:23 +08:00 — Final reported-fix verification
+
+- Confirmed final private GitHub main at 772be3847a0bb8589eed849272c63dcc14d56adc. Temporary helpers/extracted report copies are removed, with only the expected local work-log completion appendix uncommitted. Published Site version 17 remains on verified source cdf794c29b64e7ca6f6b41b1da3d8db07c5b3295. This appendix triggers no recursive documentation commit or redeployment.
+
+
+### 2026-10-23 16:59:12 +08:00 — Prepare third-party originality declaration guidance
+
+- Reviewed the supplied Section 6.2 form screenshot and current project manifest, installed framework metadata, DeepSeek integration and fixed ECB exchange-rate reference. Confirmed that the appropriate response is Yes; the project uses third-party frameworks, an API-hosted pretrained model and public exchange-rate data.
+- Verified primary DeepSeek Open Platform Terms of Service and ECB copyright/reuse conditions. API service terms must be distinguished from downloadable model-weight licenses. ECB reuse requires attribution/accurate reproduction and disclosure of modifications such as derived cross-rates; no new rate was fetched or changed. Ignored unrelated search results and relied on the providers' own pages.
+- Created D:/hack/OrderWeave-third-party-declaration.md outside the source checkout with paste-ready form wording, official links, installed direct dependency versions/licenses and a lockfile inventory (including optional/platform entries). The file distinguishes metadata inventory from a full license-compliance audit and notes the separate relevance of user-supplied asset rights and AI-assisted development disclosure. No claim of team-created AI models or fully manual coding is made.
+- No website code, merchant/buyer data, API configuration, deployment or GitHub branch was changed. This documentation/advice-only task does not require tests or a Site redeployment. Removing the owned temporary inventory-generation helper; retaining the declaration artifact and this English work-log entry.
+
+
+### 2026-10-23 18:11:54 +08:00 — Investigate document-based AI imports
+
+- Read project instructions, existing AI order extraction, menu validation and frontend import flows. Opened the existing Site source workflow and confirmed the unchanged custom audience/local storage mode.
+- Verified current official DeepSeek Files API documentation: it supports JPEG/PNG/GIF/WebP images, while document content blocks are unsupported. OrderWeave will extract document text/tables locally and submit only text to the existing authenticated server-side provider integration. No real provider request or credential change was made.
+- Planning a shared bounded document reader for menu and order imports, plus editable menu batch review with no automatic persistence or invented missing fields. Image/audio/video uploads remain excluded from document import.
+
+
+### 2026-10-23 18:18:37 +08:00 — Implement shared document extraction and menu review
+
+- Added locally bundled document readers for TXT/CSV/TSV, XLS/XLSX/ODS, DOC/DOCX/ODT, RTF and text PDFs. Documents are parsed in a bounded worker (5 MB input, 20,000 extracted characters, 30-second timeout); ZIP expansion, row/sheet/page counts, media exclusion, encryption/corruption errors and no-silent-truncation checks are enforced. Embedded media/macros are not executed or uploaded.
+- Added server-side menu extraction using the existing authenticated/rate-limited JSON endpoint and shared safe DeepSeek transport. Only extracted text is sent. Verbatim source evidence is required; missing prices, preparation times, recipes and option surcharges remain incomplete. Added editable, removable, explicitly reviewed menu batches and one final atomic save, with conflict/capacity checks and optional merchant-selected blank photo placeholders.
+- Replaced TXT-only order attachment handling with the shared document importer; kept the existing order batch review and final confirmation. Added Chinese/English/Malay messages and build-time local dependency assets/license notices.
+- Dependency installation initially failed because npm was absent from PATH and two assumed runtime locations were incorrect. Located the installed npm CLI and successfully installed pinned official SheetJS 0.20.3, fflate 0.8.3, PDF.js 6.4.299 and build-time esbuild 0.28.0. Installation reported existing unapproved lifecycle scripts; no blanket approvals were applied. Reader bundling succeeded.
+- Initial targeted tests found a legacy DOC stream type mismatch (CFB returned plain arrays). Converted streams explicitly to Uint8Array. Also fixed unknown AI option/base prices to remain blank instead of displaying zero. Existing 21 AI/order-batch tests passed. Continuing document, menu and browser verification with fictional fixtures.
+
+
+### 2026-10-23 18:45:08 +08:00 — Verify document import and fix integration findings
+
+- All initial 112 tests passed, including new real TXT/UTF-16, XLS/XLSX/ODS multi-sheet, DOC/DOCX/ODT/RTF fixtures, malformed/media/oversize rejection, source-evidence validation and reviewed atomic-batch preparation. Browser QA used the isolated loopback fictional store only.
+- Actual Excel file selection completed successfully after an unexpectedly long browser-tool response (about 20 minutes, despite a requested 20-second call timeout). The product reader correctly populated the full text preview. No repeated file chooser calls were made. Verified two unsaved dishes, a manual RM price correction, explicit placeholder selection, per-dish review, final confirmation and one local save preserving the existing menu.
+- A separate local harness exercised the same production reader worker for Word and Chinese text PDF without repeated slow chooser operations. Fixed a PDF worker handshake colliding with the document-result protocol, switched to the official compatibility build, and enabled worker-side local font/CMap asset fetching. Chinese PDF text now extracts correctly. Added protocol-regression and actual workerd menu-transport tests.
+- TypeScript, syntax, whitespace and production build passed. An expanded 114-test run found a pre-existing nondeterministic log test: its frozen clock gives all 111 rows identical times and random UUID ordering may put delivery on page two. Updated the assertion to inspect the complete paginated history rather than assume page one. Production logging behavior was not changed. Continuing the final regression run and release preparation.
+- Added README usage, file/privacy/size limits, supported legacy format caveats, DeepSeek document-input findings and pinned dependency license attribution. No production data or provider secret was read or changed.
+
+
+### 2026-10-23 18:46:18 +08:00 — Complete document-import release checks
+
+- Final expanded suite passed all 114 tests, including actual workerd menu extraction against a provider stub and the PDF-handshake regression. TypeScript/syntax/whitespace checks passed. Final production build succeeded after the localized import-help update; no application code changed afterward.
+- Browser QA confirmed Chinese PDF, Word and TXT extraction through the production worker. TXT-derived order text still yields two independent unsaved review entries; explicitly discarded them and confirmed no new order was saved. Earlier Excel menu batch saved only the two fictional dishes in the loopback test store. Production merchant/buyer data was untouched.
+- Verified the corrected menu-specific labels and captured D:/hack/orderweave-document-import.jpg. Tests and browser provider responses are simulated; no new billable DeepSeek request was made. Real authentication, provider secrets, local storage mode and deployment audience retain their existing configuration.
+- Preparing a same-Site release and private GitHub synchronization; only source/tests/documentation will be synchronized, retaining the collaborator reference files. Fixture documents, QA harnesses, screenshots, generated vendor bundles and runtime records are outside tracked source.

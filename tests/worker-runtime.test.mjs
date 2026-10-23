@@ -8,11 +8,12 @@ const source=await readFile(new URL('../lib/deepseek.mjs',import.meta.url),'utf8
 const input={text:'明天中午十二点半送两份宫保鸡丁，少辣',menu:[{id:'chicken',name:'宫保鸡丁',minutes:15}],localNow:'2026-10-22T00:00',timeZone:'Asia/Shanghai'};
 const expected={items:[{dishId:'chicken',name:'宫保鸡丁',quantity:2}],scheduledAt:'2026-10-23T12:30',location:'Fictional address',contact:'Test contact',preference:'少辣'};
 const entry=`
-export default {async fetch(request,env){try{return Response.json(await extractOrder(await request.json(),env));}catch(error){return Response.json({error:error.code},{status:error.status||500});}}};`;
+export default {async fetch(request,env){try{const input=await request.json();return Response.json(await(input.kind==='menu'?extractMenu(input,env):extractOrder(input,env)));}catch(error){return Response.json({error:error.code},{status:error.status||500});}}};`;
 
 async function runInWorker(outboundService,requestInput=input){
  const runtime=new Miniflare({compatibilityDate:'2026-05-15',modules:[
-  {type:'ESModule',path:resolve('tests/worker-fixture/entry.mjs'),contents:`import {extractOrder} from '../../lib/deepseek.mjs';`+entry},
+  {type:'ESModule',path:resolve('tests/worker-fixture/entry.mjs'),contents:`import {extractOrder} from '../../lib/deepseek.mjs';import {extractMenu} from '../../lib/menu-extraction.mjs';`+entry},
+  ...await Promise.all(['lib/menu-extraction.mjs','public/menu-import.js','public/materials.js','public/commerce.js'].map(async path=>({type:'ESModule',path:resolve(path),contents:await readFile(resolve(path),'utf8')}))),
   {type:'ESModule',path:resolve('lib/deepseek.mjs'),contents:source},
   {type:'ESModule',path:resolve('public/menu-matching.js'),contents:await readFile(new URL('../public/menu-matching.js',import.meta.url),'utf8')},
   {type:'ESModule',path:resolve('public/delivery-slots.js'),contents:await readFile(new URL('../public/delivery-slots.js',import.meta.url),'utf8')}
@@ -40,4 +41,11 @@ test('actual workerd fetch reaches the provider stub and parses its result',asyn
 test('actual workerd fetch does not follow an upstream redirect',async()=>{
  let calls=0;const result=await runInWorker(async()=>{calls++;return new Response(null,{status:307,headers:{Location:'https://untrusted.example/'}});});
  assert.equal(calls,1);assert.equal(result.status,502);assert.equal(result.body.error,'AI_UPSTREAM_REDIRECT');
+});
+test('actual workerd menu transport requires source evidence and retains unknown price',async()=>{
+ const text='红茶，5分钟';const result=await runInWorker(async request=>{
+   const body=await request.json();assert.deepEqual(JSON.parse(body.messages[1].content),{text});
+   return Response.json({choices:[{finish_reason:'stop',message:{content:JSON.stringify({dishes:[{name:'红茶',minutes:5,sourceText:text}]})}}]});
+ },{kind:'menu',text});
+ assert.equal(result.status,200);assert.equal(result.body.dishes[0].name,'红茶');assert.equal(result.body.dishes[0].priceCents,null);assert.equal(result.body.requiresMerchantConfirmation,true);
 });

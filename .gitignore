@@ -11,6 +11,7 @@
 
 # Generated builds and framework state
 /dist/
+/public/document-vendor/
 /.next/
 /.vinext/
 /out/

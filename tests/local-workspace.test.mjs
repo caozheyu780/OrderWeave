@@ -68,7 +68,11 @@ test('only actual order changes are logged; legacy noise is filtered before pagi
  const db=JSON.parse(storage.getItem(DEMO_KEY));for(let i=0;i<120;i++)db.stores[0].audit.push({id:'old-noise-'+i,at:'2026-10-22T10:00:00Z',action:'view_orders'});storage.setItem(DEMO_KEY,JSON.stringify(db));
  const page1=await api.request({},'?merchantId='+state.id+'&logs=1'),page2=await api.request({},'?merchantId='+state.id+'&logs=1&cursor='+encodeURIComponent(page1.nextCursor));assert.equal(page1.entries.length,100);assert.ok(page2.entries.length);const ids=[...page1.entries,...page2.entries].map(x=>x.id);assert.equal(new Set(ids).size,ids.length);
  assert.equal(ids.length,110);assert.equal(page2.nextCursor,null);assert.ok([...page1.entries,...page2.entries].every(x=>['order_add','order_update'].includes(x.action)));assert.equal(JSON.parse(storage.getItem(DEMO_KEY)).stores[0].audit.length,230);
- saved=await api.request({action:'save',merchantId:state.id,expectedRevision:saved.revision,menu,orders:[{...saved.orders[0],status:'delivered'}]});assert.ok((await api.request({},'?merchantId='+state.id+'&logs=1')).entries.some(x=>x.action==='order_deliver'));assert.ok(saved.orders[0].deliveredAt);
+ saved=await api.request({action:'save',merchantId:state.id,expectedRevision:saved.revision,menu,orders:[{...saved.orders[0],status:'delivered'}]});
+ // The fixed clock gives every entry the same timestamp. Random UUID tie order
+ // can place delivery on either page, so verify the complete paginated history.
+ const deliveredPage=await api.request({},'?merchantId='+state.id+'&logs=1'),deliveredTail=deliveredPage.nextCursor?await api.request({},'?merchantId='+state.id+'&logs=1&cursor='+encodeURIComponent(deliveredPage.nextCursor)):{entries:[]};
+ assert.ok([...deliveredPage.entries,...deliveredTail.entries].some(x=>x.action==='order_deliver'));assert.ok(saved.orders[0].deliveredAt);
 });
 
 test('existing stores receive stable codes without losing data or expiring them',async()=>{
