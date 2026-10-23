@@ -7,7 +7,7 @@ export function menuDraftIssue(dish,menu=[]){
   if(!dish||typeof dish.name!=='string'||!dish.name.trim()||dish.name.length>100)return 'dishName';
   try{cleanAliases(dish.aliases||[],dish.name);}catch{return 'aliases';}
   if(conflictingDish(menu,dish))return 'aliasesConflict';
-  if(typeof dish.description!=='string'||!dish.description.trim()||dish.description.length>2000)return 'dishDescription';
+  if(typeof dish.description!=='string'||dish.description.length>2000)return 'dishDescription';
   if(!validCents(dish.priceCents))return 'priceLabel';
   try{validateCommerce(dish);}catch{return 'optionsTitle';}
   try{validateRecipe(dish.ingredients);}catch{return 'recipePerServing';}
