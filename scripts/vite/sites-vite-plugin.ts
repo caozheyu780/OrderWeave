@@ -11,6 +11,7 @@ const localFullName = "Seedy";
 const localCookieName = "__sites_local_auth";
 const localHosts = new Set(["localhost", "127.0.0.1", "::1"]);
 const localAddresses = new Set(["127.0.0.1", "::1", "::ffff:127.0.0.1"]);
+const localAIPaths = new Set(["/api/ai-status", "/api/parse-order"]);
 const authPaths = new Set([
   "/signin-with-chatgpt",
   "/signout-with-chatgpt",
@@ -105,7 +106,10 @@ export function sites({ mockAuth = true } = {}): Plugin {
         const signIn = url.pathname === "/signin-with-chatgpt";
         const signOut = url.pathname === "/signout-with-chatgpt";
         if (!signIn && !signOut) {
-          if (signInCookies.length === 1 && signInCookies[0] === "1") {
+          // AI is available directly on the validated loopback dev server.
+          // This middleware is absent from production builds and LAN requests.
+          const signedIn = signInCookies.length === 1 && signInCookies[0] === "1";
+          if (signedIn || localAIPaths.has(url.pathname)) {
             setHeader(request, "oai-authenticated-user-id", localUserId);
             setHeader(request, "oai-authenticated-user-email", localEmail);
             setHeader(
