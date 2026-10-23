@@ -929,3 +929,19 @@ Future entry format:
 - Kept sidebar action labels from wrapping one character per line, and improved menu-batch persistence error messages to distinguish storage/conflict failures from provider errors. Inspected real screenshots of the red badge and date-filtered kitchen list. No production account or business record was used for QA.
 - Reviewed/preserved same-Site custom access and local-only mode, refreshed the short-lived source credential in memory, and inspected current private GitHub head/tree before synchronization. Preparing exact-source packaging; no application change is pending after the final build.
 - Cross-device recommendation remains a future shared-storage migration with store links/QR entry and per-store permissions. No cloud resources, public access, or real payment behavior was enabled in this release.
+
+
+### 2026-10-24 00:41:47 +08:00 — Publish merchant operations release
+
+- Packaged and pushed exact tested Site source f77a5dfcda5c49b9193ff071e44b1e1aa2f0d20b with D:/hack/orderweave-merchant-ops-deploy.tar.gz. Saved Site version 19: appgprj_6ad8c26e2618819193b8337bdb29a5cf~appgver_92a267e6d06c81918b6f59b4b999dbde (288 packaged files; 7,557,120 uncompressed archive bytes).
+- Deployment appgdep_6adb8e0824b881919805c1fa8f8f5e34 succeeded at 2026-10-24 00:41:07 +08:00 on the existing URL. Preserved custom access, environment revision 1, local data mode and provider configuration.
+- The final local kitchen screenshot now reflects the improved sidebar labels. Browser switching confirmed the kitchen heading and interface in Chinese, English and Malay. Screenshots are fictional local QA evidence, not production-account captures.
+- Audited all 104 tracked UTF-8 source files against excluded runtime/binary data and credential patterns. Verified the GitHub tree against every local blob, preserving all five collaborator-only references (109 total files). Updating private main without force and with the expected previous head, then synchronizing this release log. No merchant/buyer data, imported documents, screenshots or secrets entered GitHub source.
+
+
+### 2026-10-24 00:42:23 +08:00 — Verify GitHub and finish merchant operations work
+
+- Verified private GitHub main at e44e307ef3a4ca1ac76d8280005ac76fb8731e22, with tree 025a9ae8f57afd11b97753bc86b2241d38083155. All 104 local source files and the five retained collaborator files were verified. Synchronizing this final English release-log entry as a documentation-only follow-up.
+- Refreshed the existing production tab and confirmed its unchanged ChatGPT gate; kept it as the deliverable. Closed only the temporary local QA tab. Native Site deployment success confirms version 19; local browser/automated checks supply feature evidence without opening a production business session.
+- Stopped the owned loopback process by interruption (host exit status 1, without teardown counters). Removed only this turn's explicitly named editing, preview and transfer helpers. Kept the release archive and four QA screenshots outside the source checkout. Existing browser data, earlier helpers and user attachments were not removed.
+- The intentional local QA records are two new buyer orders (one accepted, one declined), one confirmed import order, one imported/edited menu dish and their batch/decision history, plus the fictional store receiving-hour setting. No real payment or provider billing occurred. This release keeps local-only persistence; shared storage/store links or QR entry remain a recommendation for later work. No further application change or documentation-only redeployment is required.
