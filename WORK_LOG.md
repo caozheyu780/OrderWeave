@@ -863,3 +863,18 @@ Future entry format:
 - Browser QA confirmed Chinese PDF, Word and TXT extraction through the production worker. TXT-derived order text still yields two independent unsaved review entries; explicitly discarded them and confirmed no new order was saved. Earlier Excel menu batch saved only the two fictional dishes in the loopback test store. Production merchant/buyer data was untouched.
 - Verified the corrected menu-specific labels and captured D:/hack/orderweave-document-import.jpg. Tests and browser provider responses are simulated; no new billable DeepSeek request was made. Real authentication, provider secrets, local storage mode and deployment audience retain their existing configuration.
 - Preparing a same-Site release and private GitHub synchronization; only source/tests/documentation will be synchronized, retaining the collaborator reference files. Fixture documents, QA harnesses, screenshots, generated vendor bundles and runtime records are outside tracked source.
+
+
+### 2026-10-23 22:29:55 +08:00 — Publish document and batch-menu imports
+
+- Packaged and pushed exact tested Site source d42afc436eefca40fa1a16dcba12992adc8fe1d8, using D:/hack/orderweave-document-import-deploy.tar.gz. Saved Site version 18: appgprj_6ad8c26e2618819193b8337bdb29a5cf~appgver_58ac7cda51648191be7a4b37af3211c7 (285 packaged files; 7,516,160 uncompressed archive bytes).
+- Deployment appgdep_6adb3b54f64481919ac1b1177dc76440 succeeded at 18:48:16 +08:00 on the existing Site URL. The custom audience, environment revision 1 and local account/data mode were preserved. The live tab was refreshed and still shows its unchanged ChatGPT access gate; native deployment success confirms publication. No production session or business record was opened.
+- Audited all 100 tracked UTF-8 source files for excluded runtime/fixture/binary files and credential patterns. Prepared 23 changed source/test/documentation files for private GitHub and verified the new tree against all 100 local blob hashes, preserving the five collaborator-only reference files (105 total). Generated parser assets are built into deployment only; merchant documents, browser accounts/orders/menu records and secrets were not committed.
+- Completing the guarded GitHub main update and release-log sync. Full 114-test suite, TypeScript, final build and local browser validation passed; no real provider billing check was performed.
+
+
+### 2026-10-23 22:30:13 +08:00 — Verify GitHub source and finish document import work
+
+- Updated private GitHub main without force, with the expected previous head, to 491dce99980f5e169563cc8b7d9055922bf29e3c. Readback matched. Verified tree b34ae381ad0d219df3ea2c0a0aa7025a1b707f85 contains all 100 local tracked source blobs and the five unchanged collaborator reference files.
+- Synchronizing this English release log as a documentation-only follow-up. Site version 18 remains the successful production release from source d42afc436eefca40fa1a16dcba12992adc8fe1d8; no documentation-only redeployment is required.
+- Stopping the owned local preview and closing only temporary QA tabs. Removing this turn's owned temporary editing, fixture, browser-harness and GitHub-transfer helpers under D:/hack/tmp using explicit paths. Retaining the screenshot and deployment archive outside the repository. Existing merchant/buyer browser records and original user attachments remain untouched. The only new records are the two explicitly confirmed fictional dishes in the isolated local QA store.
