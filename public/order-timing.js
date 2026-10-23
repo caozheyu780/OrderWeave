@@ -5,7 +5,7 @@ export function preparationEstimate(order){
   return {minutes,incomplete};
 }
 export function orderTiming(order,now=Date.now()){
-  if(order.status==='delivered')return {state:'complete'};
+  if(['delivered','awaiting_acceptance','rejected'].includes(order.status))return {state:'complete'};
   const window=deliveryWindow(order);if(!window)return {state:'unknown'};
   const remainingMs=new Date(window.scheduledAt).getTime()-Number(now);
   if(!Number.isFinite(remainingMs))return {state:'unknown'};

@@ -1,4 +1,5 @@
 import {findNamedDish} from './menu-matching.js';
+import {isActiveOrder} from './merchant-operations.js';
 
 export const materialUnits=['g','kg','ml','l','piece','slice','spoon','portion'];
 const clean=value=>String(value??'').normalize('NFKC').trim().replace(/\s+/g,' ');
@@ -34,6 +35,7 @@ function itemRecipe(item,menu){
   return {basis:dish?'estimate':'unavailable',ingredients:recipeRows(dish?.ingredients)};
 }
 export function aggregateMaterials(orders,menu){
+  orders=orders.filter(o=>!['awaiting_acceptance','rejected'].includes(o.status));
   const totals=new Map(),missing=new Map();let estimated=false;
   for(const order of orders)for(const item of order.items||[]){
     const recipe=itemRecipe(item,menu),quantity=Number(item.quantity);
@@ -53,7 +55,7 @@ export function aggregateMaterials(orders,menu){
   return {totals:[...totals.values()].sort((a,b)=>a.name.localeCompare(b.name)||a.unit.localeCompare(b.unit)),missing:[...missing.values()],estimated,orderCount:orders.length};
 }
 export function materialOrders(orders,scope,now=new Date()){
-  if(scope!=='today')return orders.filter(order=>order.status!=='delivered');
+  if(scope!=='today')return orders.filter(isActiveOrder);
   return orders.filter(order=>{
     if(order.status!=='delivered'||!order.deliveredAt)return false;
     const delivered=new Date(order.deliveredAt);

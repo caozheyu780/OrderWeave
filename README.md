@@ -1,5 +1,17 @@
 # OrderWeave
 
+## Receiving, kitchen and order approval
+
+The merchant Orders page includes daily receiving-hour settings with a store time zone. Disabled scheduling accepts all day; enabled windows include the opening minute and exclude the closing minute. An earlier closing time crosses midnight. Buyer checkout rechecks current receiving hours and keeps the cart if closed. Merchants can still manually enter or import orders for reconciliation. Existing stores default to unrestricted receiving hours.
+
+New buyer orders start as `awaiting_acceptance`. A red numeric badge on Add Order counts these requests, and Add Order displays their review inbox alongside manual/AI entry. Merchants explicitly accept or decline; declining requires a reason. Both decisions require confirmation and are recorded with the operator/time. Before acceptance, orders do not contribute to active-order counts, kitchen production, ingredient requirements or urgency alerts. Declined orders remain visible in order history and to their buyer, with the reason. They cannot be moved back to production through ordinary editing. Existing buyer orders from earlier versions retain their current status. Local simulated payment records are preserved; no real charges/refunds occur.
+
+The Kitchen preparation page groups only accepted pending/preparing orders by delivery window, dish and options/preferences, with serving counts, notes, related order numbers and estimated work minutes. It excludes delivering, delivered, unconfirmed and rejected orders. Date and half-hour filters can narrow the list; a blank date shows all dates. Ingredient requirements remain on the separate Materials page. Order sorting supports natural location order, creation time, scheduled delivery and actual delivery, in either direction; missing values remain last.
+
+Menu and order imports now persist a batch ID and metadata for create, draft edit, entry removal, discard and final confirmation. Logs identify the operator, timestamp, batch kind/ID and remaining entry count, without copying source text. Final confirmation atomically saves all remaining records, their batch links and the confirmation log. Record batch links and buyer decisions cannot be rewritten through generic save operations. Batch drafts themselves still live in memory: reloading does not restore unfinished input, although its batch activity remains logged. Business JSON exports include receiving-hour and batch metadata; public menu exports continue excluding internal data.
+
+Cross-device ordering is still outside the current local-storage mode: buyers and operators must use the same browser storage context. A future shared-storage version should keep store boundaries, operator permissions, merchant approval and the same batch/audit model, and migrate local records explicitly rather than exposing local browser storage or pretending store codes synchronize devices.
+
 OrderWeave 是面向小型餐饮店铺的菜单、外卖订单与配送管理平台，使用 DeepSeek 服务端接口解析订单文字。
 
 ## Buyer ordering (browser-local)

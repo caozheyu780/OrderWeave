@@ -62,7 +62,7 @@ test('quota errors and invalid writes do not lose previously saved records',asyn
 });
 test('only actual order changes are logged; legacy noise is filtered before pagination',async()=>{
  const {api,storage}=create(),state=await api.request(ownerInput);const before=storage.getItem(DEMO_KEY);
- for(const event of ['login','view_orders','view_menu','language','form_order','recognition_success','export','cancel'])await api.request({action:'event',merchantId:state.id,event});assert.equal(storage.getItem(DEMO_KEY),before);
+ for(const event of ['login','view_orders','view_menu','view_kitchen','language','form_order','recognition_success','export','cancel'])await api.request({action:'event',merchantId:state.id,event});assert.equal(storage.getItem(DEMO_KEY),before);
  let saved=await api.request({action:'save',merchantId:state.id,expectedRevision:0,menu,orders:[]});assert.equal((await api.request({},'?merchantId='+state.id+'&logs=1')).entries.length,0);
  for(let i=0;i<110;i++)saved=await api.request({action:'save',merchantId:state.id,expectedRevision:saved.revision,menu,orders:[{...order,notes:'Edit '+i}]});
  const db=JSON.parse(storage.getItem(DEMO_KEY));for(let i=0;i<120;i++)db.stores[0].audit.push({id:'old-noise-'+i,at:'2026-10-22T10:00:00Z',action:'view_orders'});storage.setItem(DEMO_KEY,JSON.stringify(db));

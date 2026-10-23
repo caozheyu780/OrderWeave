@@ -2,6 +2,7 @@ import {priceItem,CURRENCY} from './commerce.js';
 import {snapshotItem} from './materials.js';
 import {localDateTime,validateOrder} from './core.js';
 import {deliveryWindow} from './delivery-slots.js';
+import {acceptingOrders} from './merchant-operations.js';
 export const BUYER_SESSION='orderweave-buyer-session';
 const fail=code=>{throw Error(code);};
 const trim=(v,max)=>String(v??'').trim().slice(0,max);
@@ -10,7 +11,7 @@ function image(value){return value===''||typeof value==='string'&&value.length<=
 export function createBuyerHandler({sessionStorage,crypt,now,passwordHash,uid,commit,audit}){
  function buyers(data){if(data.buyers!==undefined&&!Array.isArray(data.buyers))fail('LOCAL_DATA_INVALID');return data.buyers||[];}
  function current(data){const id=sessionStorage.getItem(BUYER_SESSION),b=buyers(data).find(b=>b.id===id);if(!b)fail('BUYER_AUTH_REQUIRED');return b;}
- function state(data,b){return {profile:{id:b.id,phone:b.phone,name:b.name,avatar:b.avatar,profileComplete:b.profileComplete,addresses:structuredClone(b.addresses)},cart:structuredClone(b.cart),stores:data.stores.map(s=>({id:s.id,shop:s.shop,menu:structuredClone(s.menu.map(({id,name,image,description,minutes,priceCents,category,optionGroups})=>({id,name,image,description,minutes,priceCents,category,optionGroups})))})),orders:data.stores.flatMap(s=>s.orders.filter(o=>o.buyerId===b.id).map(o=>({...structuredClone(o),shop:s.shop}))).sort((a,b)=>b.createdAt.localeCompare(a.createdAt))};}
+ function state(data,b){return {profile:{id:b.id,phone:b.phone,name:b.name,avatar:b.avatar,profileComplete:b.profileComplete,addresses:structuredClone(b.addresses)},cart:structuredClone(b.cart),stores:data.stores.map(s=>({id:s.id,shop:s.shop,receivingHours:structuredClone(s.receivingHours||null),menu:structuredClone(s.menu.map(({id,name,image,description,minutes,priceCents,category,optionGroups})=>({id,name,image,description,minutes,priceCents,category,optionGroups})))})),orders:data.stores.flatMap(s=>s.orders.filter(o=>o.buyerId===b.id).map(o=>({...structuredClone(o),shop:s.shop}))).sort((a,b)=>b.createdAt.localeCompare(a.createdAt))};}
  async function quote(data,b){
   const store=data.stores.find(s=>s.id===b.cart.storeId);if(!store||!b.cart.lines.length)fail('CART_EMPTY');
   const items=b.cart.lines.map(line=>snapshotItem(priceItem(store.menu.find(d=>d.id===line.dishId),line),store.menu));
@@ -55,10 +56,11 @@ export function createBuyerHandler({sessionStorage,crypt,now,passwordHash,uid,co
    const address=b.addresses.find(a=>a.id===input.addressId);if(!address)fail('ADDRESS_REQUIRED');
    if(!['local_wallet','local_card','cash'].includes(input.paymentMethod))fail('PAYMENT_INVALID');
    const window=deliveryWindow(input);if(!window||new Date(window.scheduledEndAt)<=now())fail('DELIVERY_INVALID');
-   const store=data.stores.find(s=>s.id===q.storeId);if(store.orders.length>=10000)fail('INVALID_DATA');
+   const store=data.stores.find(s=>s.id===q.storeId);if(!acceptingOrders(store.receivingHours,now()))fail('STORE_CLOSED');if(store.orders.length>=10000)fail('INVALID_DATA');
    const timestamp=now().toISOString(),prefix=localDateTime(now()).slice(0,10).replaceAll('-','');let seq=store.orders.length,number;do{number=prefix+'-'+String(++seq).padStart(3,'0');}while(store.orders.some(o=>o.number===number));
    const order={id:uid(),number,source:'buyer',buyerId:b.id,checkoutId:input.requestId,items:q.items,customer:address.name,contact:address.phone,location:address.location,preference:q.items.map(i=>i.name+': '+i.options.map(o=>o.groupName+' / '+o.name).join(' · ')).join('\n'),notes:trim(input.notes,3000),...window,status:'pending',createdAt:timestamp,updatedAt:timestamp,totalCents:q.totalCents,currency:q.currency,payment:{mode:'local',method:input.paymentMethod,status:input.paymentMethod==='cash'?'due':'simulated_paid',amountCents:q.totalCents,recordedAt:timestamp}};
-   if(validateOrder(order))fail('INVALID_DATA');store.orders.push(order);store.revision++;audit(store,{id:b.id,name:b.name,username:b.phone},'order_add',number);
+   order.status='awaiting_acceptance';
+   if(validateOrder(order))fail('INVALID_DATA');store.orders.push(order);store.revision++;audit(store,{id:b.id,name:b.name,username:b.phone},'order_submit',number);
    b.cart={storeId:null,version:uid(),lines:[]};commit(context);return {order:structuredClone(order),...state(data,b)};
   }
   fail('INVALID_DATA');
