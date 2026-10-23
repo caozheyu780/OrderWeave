@@ -13,7 +13,7 @@ export default {async fetch(request,env){try{const input=await request.json();re
 async function runInWorker(outboundService,requestInput=input){
  const runtime=new Miniflare({compatibilityDate:'2026-05-15',modules:[
   {type:'ESModule',path:resolve('tests/worker-fixture/entry.mjs'),contents:`import {extractOrder} from '../../lib/deepseek.mjs';import {extractMenu} from '../../lib/menu-extraction.mjs';`+entry},
-  ...await Promise.all(['lib/menu-extraction.mjs','public/menu-import.js','public/materials.js','public/commerce.js','public/merchant-operations.js'].map(async path=>({type:'ESModule',path:resolve(path),contents:await readFile(resolve(path),'utf8')}))),
+  ...await Promise.all(['public/import-limits.js','lib/menu-extraction.mjs','public/menu-import.js','public/materials.js','public/commerce.js','public/merchant-operations.js'].map(async path=>({type:'ESModule',path:resolve(path),contents:await readFile(resolve(path),'utf8')}))),
   {type:'ESModule',path:resolve('lib/deepseek.mjs'),contents:source},
   {type:'ESModule',path:resolve('public/menu-matching.js'),contents:await readFile(new URL('../public/menu-matching.js',import.meta.url),'utf8')},
   {type:'ESModule',path:resolve('public/delivery-slots.js'),contents:await readFile(new URL('../public/delivery-slots.js',import.meta.url),'utf8')}
@@ -48,4 +48,13 @@ test('actual workerd menu transport requires source evidence and retains unknown
    return Response.json({choices:[{finish_reason:'stop',message:{content:JSON.stringify({dishes:[{name:'红茶',minutes:5,sourceText:text}]})}}]});
  },{kind:'menu',text});
  assert.equal(result.status,200);assert.equal(result.body.dishes[0].name,'红茶');assert.equal(result.body.dishes[0].priceCents,null);assert.equal(result.body.requiresMerchantConfirmation,true);
+});
+
+test('actual workerd carries a large Unicode document without the former request-size restriction',async()=>{
+ const text='餐'.repeat(100000);
+ const result=await runInWorker(async request=>{
+   const body=await request.json();assert.equal(JSON.parse(body.messages[1].content).text,text);
+   return Response.json({choices:[{finish_reason:'stop',message:{content:JSON.stringify(expected)}}]});
+ },{...input,text});
+ assert.equal(result.status,200);assert.equal(result.body.items[0].quantity,2);
 });

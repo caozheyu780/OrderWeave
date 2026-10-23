@@ -1,3 +1,4 @@
+import {readAIInput} from '../../../lib/ai-request.mjs';
 import { env } from 'cloudflare:workers';
 import { AIError, extractOrder } from '../../../lib/deepseek.mjs';
 import { extractMenu } from '../../../lib/menu-extraction.mjs';
@@ -18,13 +19,7 @@ export async function POST(request: Request) {
   if (bucket.count >= 12) return Response.json({error:'AI_RATE_LIMIT'}, {status:429, headers:{'Retry-After':'60','Cache-Control':'no-store'}});
   bucket.count++; rate.set(user.userId, bucket);
   try {
-    if (Number(request.headers.get('content-length') || 0) > 200000) throw new AIError('REQUEST_TOO_LARGE', 413);
-    const reader = request.body?.getReader();
-    if (!reader) throw new AIError('INVALID_REQUEST', 400);
-    const chunks: Uint8Array[] = []; let length = 0;
-    try { while (true) { const {done, value} = await reader.read(); if (done) break; length += value.length; if (length > 200000) { await reader.cancel(); throw new AIError('REQUEST_TOO_LARGE',413); } chunks.push(value); } } finally { reader.releaseLock(); }
-    const bytes = new Uint8Array(length); let offset = 0; for (const chunk of chunks) {bytes.set(chunk,offset); offset += chunk.length;}
-    let input; try {input = JSON.parse(new TextDecoder().decode(bytes));} catch {throw new AIError('INVALID_REQUEST',400);}
+    const input = await readAIInput(request);
     if(!LOCAL_DEMO){const member = env.DB && typeof input.merchantId==='string' && await env.DB.prepare('SELECT id FROM members WHERE store_id=? AND user_id=? AND disabled=0').bind(input.merchantId,user.userId).first();
     if(!member) return Response.json({error:'AUTH_REQUIRED'}, {status:403,headers:{'Cache-Control':'no-store'}});}
     const result = input.kind==='menu'?await extractMenu(input, env):await extractOrder(input, env);

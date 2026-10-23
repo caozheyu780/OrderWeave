@@ -2,7 +2,8 @@ import * as XLSX from 'xlsx';
 import {unzipSync} from 'fflate';
 
 export const DOCUMENT_EXTENSIONS=['txt','csv','tsv','xlsx','xls','ods','docx','doc','odt','rtf','pdf'];
-export const FILE_LIMIT=5*1024*1024,TEXT_LIMIT=20000;
+import {FILE_LIMIT,TEXT_LIMIT,SPREADSHEET_ROWS,PDF_PAGES} from '../public/import-limits.js';
+export {FILE_LIMIT,TEXT_LIMIT};
 const fail=code=>{throw Error(code);};
 const decoder=(bytes,encoding='utf-8',fatal=false)=>new TextDecoder(encoding,{fatal}).decode(bytes);
 function plain(bytes){
@@ -38,7 +39,7 @@ export function inspectZip(bytes){
   for(let i=0;i<count;i++){
     if(p+46>end||v.getUint32(p,true)!==0x02014b50)fail('INVALID');
     const flags=v.getUint16(p+8,true),method=v.getUint16(p+10,true),compressed=v.getUint32(p+20,true),expanded=v.getUint32(p+24,true),n=v.getUint16(p+28,true),extra=v.getUint16(p+30,true),comment=v.getUint16(p+32,true),local=v.getUint32(p+42,true);
-    total+=expanded;if(total>32*1024*1024||expanded>16*1024*1024||expanded>Math.max(1024*1024,compressed*300))fail('TOO_LARGE');
+    total+=expanded;if(total>64*1024*1024||expanded>32*1024*1024||expanded>Math.max(1024*1024,compressed*300))fail('TOO_LARGE');
     if(flags&1||![0,8].includes(method)||p+46+n+extra+comment>end||local+30>start||v.getUint32(local,true)!==0x04034b50)fail('INVALID');
     const name=decoder(bytes.subarray(p+46,p+46+n));if(names.includes(name)||name.includes('..')||name.startsWith('/'))fail('INVALID');names.push(name);
     const localFlags=v.getUint16(local+6,true),localMethod=v.getUint16(local+8,true);
@@ -57,10 +58,10 @@ function spreadsheet(bytes,ext){
   if(ext!=='xls'){const names=inspectZip(bytes);if(ext==='xlsx'&&!names.includes('xl/workbook.xml')||ext==='ods'&&!names.includes('content.xml'))fail('INVALID');}
   else if(!isOLE(bytes))fail('INVALID');
   // Formulas/macros/external links are never executed. Keep displayed cell values.
-  const book=XLSX.read(bytes,{type:'array',cellFormula:false,cellHTML:false,cellStyles:false,bookVBA:false,sheetRows:1002});
+  const book=XLSX.read(bytes,{type:'array',cellFormula:false,cellHTML:false,cellStyles:false,bookVBA:false,sheetRows:SPREADSHEET_ROWS+1});
   if(book.SheetNames.length>30)fail('TOO_LARGE');
   const sections=[];
-  for(const name of book.SheetNames){const sheet=book.Sheets[name];if(!sheet)continue;const range=sheet['!fullref']||sheet['!ref'];if(!range)continue;const dims=XLSX.utils.decode_range(range);if(dims.e.r>1000||dims.e.c>99)fail('TOO_LARGE');
+  for(const name of book.SheetNames){const sheet=book.Sheets[name];if(!sheet)continue;const range=sheet['!fullref']||sheet['!ref'];if(!range)continue;const dims=XLSX.utils.decode_range(range);if(dims.e.r>=SPREADSHEET_ROWS||dims.e.c>99)fail('TOO_LARGE');
     const rows=XLSX.utils.sheet_to_json(sheet,{header:1,raw:false,defval:'',blankrows:true});
     sections.push('['+name+']\n'+rows.map(row=>row.map(cell=>String(cell).replace(/\r?\n/g,' / ')).join('\t')).join('\n'));
   }
@@ -109,7 +110,7 @@ async function pdfText(bytes){
   if(decoder(bytes.subarray(0,5))!=='%PDF-')fail('INVALID');
   const pdfjs=await import('./pdf.mjs');pdfjs.GlobalWorkerOptions.workerSrc=new URL('./pdf.worker.mjs',import.meta.url).href;
   const task=pdfjs.getDocument({data:bytes,isEvalSupported:false,useSystemFonts:false,useWorkerFetch:true,stopAtErrors:true,cMapUrl:new URL('./cmaps/',import.meta.url).href,cMapPacked:true,standardFontDataUrl:new URL('./standard_fonts/',import.meta.url).href});
-  try{const doc=await task.promise;if(doc.numPages>50)fail('TOO_LARGE');let text='';for(let page=1;page<=doc.numPages;page++){const item=await doc.getPage(page),content=await item.getTextContent();text+=content.items.map(v=>v.str+(v.hasEOL?'\n':' ')).join('')+'\n\n';if(text.length>TEXT_LIMIT)fail('TOO_LARGE');item.cleanup();}return text;}finally{await task.destroy();}
+  try{const doc=await task.promise;if(doc.numPages>PDF_PAGES)fail('TOO_LARGE');let text='';for(let page=1;page<=doc.numPages;page++){const item=await doc.getPage(page),content=await item.getTextContent();text+=content.items.map(v=>v.str+(v.hasEOL?'\n':' ')).join('')+'\n\n';if(text.length>TEXT_LIMIT)fail('TOO_LARGE');item.cleanup();}return text;}finally{await task.destroy();}
 }
 export async function readDocumentBytes(name,input){
   const ext=String(name).toLowerCase().split('.').pop(),bytes=new Uint8Array(input);

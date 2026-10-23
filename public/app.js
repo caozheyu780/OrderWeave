@@ -1,3 +1,4 @@
+import {TEXT_LIMIT} from './import-limits.js';
 import {escapeHtml as e,validateOrder,parseOrderText,localDateTime} from './core.js';
 import {messages,interfaceLanguages,resolveLanguage,languageConfig,recognitionText} from './i18n.js';
 import {getAIStatus,recognizeWithAI} from './ai-adapter.js';
@@ -196,11 +197,11 @@ function aiMessage(code){return messages[language]['aiError'+code]||t('aiErrorAI
 async function recognitionForm(){await logEvent('recognition_open');
   const rulesLabel=t('rulesOnly');
   const aiLabel=t('extractAI');
-  openModal(t('recognitionTitle'),`<form id="recognition-form"><div class="modal-body"><div id="ai-notice" class="notice">${t('checkingAI')}</div><p>${t('batchInputHelp')}</p>${textarea('source',t('recognitionLabel'),'',true,`class="source-text" maxlength="20000" placeholder="${e(t('recognitionPlaceholder'))}"`)}${documentField(t)}<p id="recognition-error" class="error" role="alert"></p>${button('use-basic-rules',rulesLabel,'small ghost')}</div></form>`,footer(aiLabel,'recognition-form'));
+  openModal(t('recognitionTitle'),`<form id="recognition-form"><div class="modal-body"><div id="ai-notice" class="notice">${t('checkingAI')}</div><p>${t('batchInputHelp')}</p>${textarea('source',t('recognitionLabel'),'',true,`class="source-text" maxlength="${TEXT_LIMIT}" placeholder="${e(t('recognitionPlaceholder'))}"`)}${documentField(t)}<p id="recognition-error" class="error" role="alert"></p>${button('use-basic-rules',rulesLabel,'small ghost')}</div></form>`,footer(aiLabel,'recognition-form'));
   const form=document.querySelector('#recognition-form'),source=form.querySelector('#f-source'),error=form.querySelector('#recognition-error'),submit=modal.querySelector('[type=submit]'),notice=form.querySelector('#ai-notice');
   submit.disabled=true;let configured=false;
   const isCurrent=()=>modal.open&&document.querySelector('#recognition-form')===form;
-  function readSource(){const text=source.value.trim();if(text.length>20000){error.textContent=t('document_TOO_LARGE');return null;}if(!text){error.textContent=t('emptyText');source.focus();return null}return text;}
+  function readSource(){const text=source.value.trim();if(text.length>TEXT_LIMIT){error.textContent=t('document_TOO_LARGE');return null;}if(!text){error.textContent=t('emptyText');source.focus();return null}return text;}
   form.querySelector('[data-action=use-basic-rules]').addEventListener('click',()=>{const text=readSource();if(text){logEvent('recognition_rules');}if(text)startBatchReview({orders:[parseOrderText(text,account().menu)],sourceText:text,warnings:[t('batchRulesNotice')]},'rules');});
   const reading=wireDocumentImport({form,source,input:form.querySelector('#text-file'),error,t,confirmAction,isCurrent,busy:value=>{submit.disabled=value||!configured;form.querySelector('[data-action=use-basic-rules]').disabled=value;}});
   form.addEventListener('submit',async event=>{event.preventDefault();if(!configured||reading())return;const text=readSource();if(!text)return;submit.disabled=true;submit.textContent=t('busy');error.textContent='';form.querySelector('[data-action=use-basic-rules]').disabled=true;source.readOnly=true;form.querySelector('#text-file').disabled=true;try{await logEvent('recognition_start');const result=await recognizeWithAI(text,account().menu,currentId);if(!isCurrent())return;await logEvent('recognition_success');await startBatchReview(result,'ai');}catch(err){await logEvent('recognition_failure');if(isCurrent())error.textContent=aiMessage(err.message);}finally{submit.disabled=false;submit.textContent=aiLabel;form.querySelector('[data-action=use-basic-rules]').disabled=false;source.readOnly=false;form.querySelector('#text-file').disabled=false;}});

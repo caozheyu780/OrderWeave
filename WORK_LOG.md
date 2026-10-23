@@ -945,3 +945,48 @@ Future entry format:
 - Refreshed the existing production tab and confirmed its unchanged ChatGPT gate; kept it as the deliverable. Closed only the temporary local QA tab. Native Site deployment success confirms version 19; local browser/automated checks supply feature evidence without opening a production business session.
 - Stopped the owned loopback process by interruption (host exit status 1, without teardown counters). Removed only this turn's explicitly named editing, preview and transfer helpers. Kept the release archive and four QA screenshots outside the source checkout. Existing browser data, earlier helpers and user attachments were not removed.
 - The intentional local QA records are two new buyer orders (one accepted, one declined), one confirmed import order, one imported/edited menu dish and their batch/decision history, plus the fictional store receiving-hour setting. No real payment or provider billing occurred. This release keeps local-only persistence; shared storage/store links or QR entry remain a recommendation for later work. No further application change or documentation-only redeployment is required.
+
+
+### 2026-10-24 00:42:46 +08:00 — Final merchant operations completion check
+
+- Readback confirmed private GitHub main at 47df8edc988a27c8eb890b962e71f12fc5452de8 after release-log synchronization. The tested website remains on successful Site version 19 / source f77a5dfcda5c49b9193ff071e44b1e1aa2f0d20b. Only this expected local work-log completion appendix remains uncommitted; no recursive documentation synchronization or redeployment is needed.
+
+### 2026-10-24 00:49:18 +08:00 — Local startup guidance
+
+- Reviewed project instructions, recent work-log entries, package scripts, the development launcher, environment-variable example, and Git status to prepare Windows instructions for a downloaded GitHub checkout. Confirmed Node.js >=22.13.0, the install:ci script, and the portable development server default port 5173. Earlier reads in this investigation also checked the installer, execution profile, README, and local authentication configuration.
+- Explained first-time dependency installation through npm.cmd run install:ci, startup through npm.cmd run dev, optional ignored .dev.vars configuration for DeepSeek, and browser-origin-specific local business data. No credentials were read or recorded. No fresh-clone installation, application test, build, deployment, or GitHub synchronization was performed; only this log was updated.
+
+- Checked the official Node.js download page and confirmed that Node.js 24 is offered as an LTS release for the installation link in this guidance.
+
+### 2026-10-24 00:50:58 +08:00 — Download official Node.js Windows installer
+
+- Checked the available Node executable and Windows architecture. Found Codex's bundled Node.js v24.22.1, Windows x64, and no Node executable in the standard Program Files installation locations.
+- The web tool could not open the official checksum text; an initial sandboxed PowerShell download then failed with a DNS resolution error. Retried the explicitly requested official download with approved network access and succeeded.
+- Downloaded node-v24.22.1-x64.msi from https://nodejs.org/dist/latest-v24.x/ to D:\hack (33,333,248 bytes). SHA256 matched the official SHASUMS256.txt, and Windows Authenticode reported a Valid signature from OpenJS Foundation.
+- Delivered the downloaded installer for the user to open. Did not launch the installer or change system software, PATH, application source, browser data, or deployment.
+
+
+### 2026-10-24 00:56:02 +08:00 — Explain document import size limits
+
+- Read project instructions and recent log entries, then traced the screenshot message to public/document-i18n.js, the browser document importer, scripts/document-reader-core.mjs, and AI request validators.
+- Confirmed application-enforced limits of 5 MiB per source file and 20,000 extracted text characters, plus bounded ZIP expansion and spreadsheet dimensions. The shared TOO_LARGE message can appear even for files below 5 MiB when extracted text or internal document bounds are exceeded. This error originates during local validation rather than from a DeepSeek response.
+- Prepared clarification that these limits are configurable application behavior; no limit, source, configuration, or deployment was changed and no provider request or test was run.
+
+
+### 2026-10-24 00:59:56 +08:00 — Increase document import capacity
+
+- Traced document-reader, browser form, AI transport and source-evidence bounds. Some exploratory reads used nonexistent guessed test/API paths; resolved them using rg --files and the shared parse-order endpoint. The initial source-opening helper could not reach the repository under the sandbox and was stopped; the approved retry opened the existing Site source successfully. A process diagnostic also found CIM unavailable; it made no changes.
+- Raised the shared file limit to 20 MiB and extracted-text limit to 100,000 characters; aligned both import forms, order/menu AI validators, stored source evidence and Chinese/English/Malay messages. Raised bounded JSON requests to 1 MiB, local read timeout to 60 seconds, spreadsheet rows to 5,000, PDF pages to 200 and ZIP expansion to 64 MiB total / 32 MiB per entry. Kept expansion-ratio checks, explicit overflow errors, 20-order/30-dish review batches, merchant approval and local persistence.
+- Added regressions for full-length Chinese text, a 6 MiB Word document, 2,000-row spreadsheets, client file rejection, provider transport and API streamed/declarative byte limits. Initial sandboxed workerd tests failed and stalled; stopped that run and verified all seven workerd/D1/R2 checks pass with approved local process/network access. Earlier pure-reader/provider-stub checks passed. Type and syntax checks are being completed, followed by the full regression suite and production build. No real AI request or billing occurred.
+
+### 2026-10-24 01:01:15 +08:00 — Verify larger imports before publication
+
+- Full automated regression suite passed: 129/129, including actual workerd provider stubs and dormant D1/R2 compatibility. TypeScript, syntax checks and git diff --check passed. Corrected the prior work log's trailing blank line found by the initial whitespace check. The production Vinext build succeeded and rebuilt the document worker with shared limits.
+- Started the existing loopback preview with fictional local records and a simulated provider status. Verified both menu/order import dialogs show 20 MB / 100,000 characters and both textarea maxlength values are 100000; the order field retained 99,999 characters. Saved D:\hack\orderweave-larger-import.png. Cancelled the unsaved order input and closed the temporary QA tab without submitting AI extraction or creating records. Large-file behavior itself was checked through automated reader/client tests; the browser file picker was not exercised.
+- Existing Site access remains custom. Preparing a matching source/archive for publication; no real provider request or billing occurred.
+
+### 2026-10-24 01:03:24 +08:00 — Publish larger document import limits
+
+- Source helper pushed commit 95855e634c905afe7ed9915df9891e351b619aa1 and packaged D:\hack\orderweave-larger-import-deploy.tar.gz. Saved Site version 20 (appgprj_6ad8c26e2618819193b8337bdb29a5cf~appgver_aec872bb16488191901e1d2b8841c9cd); deployment appgdep_6adb931a0d088191a471346539e56a66 succeeded at 2026-10-24 01:02:44 +08:00, preserving the custom audience and environment revision 1.
+- Preparing the tested source and English log for the existing private GitHub repository while retaining collaborator-only files. A first full-manifest transport exceeded command output limits and failed JSON parsing; switched to metadata plus bounded Base64 chunks. Only tracked source files are considered; installers, screenshots, deployment bundles, environment secrets and browser business data are excluded.
+- This release raises input capacity; batch counts remain at 20 orders / 30 dishes and oversized batches still require splitting. No automatic multi-request splitting was added. Provider accuracy on larger real documents was not measured; all transport tests used stubs.

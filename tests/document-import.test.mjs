@@ -4,6 +4,7 @@ import {zipSync,strToU8} from 'fflate';
 import * as XLSX from 'xlsx';
 import {readDocumentBytes,inspectZip} from '../scripts/document-reader-core.mjs';
 import {readDocument} from '../public/document-import.js';
+import {FILE_LIMIT,TEXT_LIMIT,SPREADSHEET_ROWS} from '../public/import-limits.js';
 const encode=s=>new TextEncoder().encode(s);
 const menu='宫保鸡丁\tRM 18.50\n材料：鸡肉 300g，花生 30g\n制作时间15分钟';
 const docx=xml=>zipSync({'[Content_Types].xml':strToU8('<Types/>'),'word/document.xml':strToU8(xml),'word/media/ignored.png':new Uint8Array([1,2,3])});
@@ -37,12 +38,32 @@ test('rejects unsupported media, renamed binaries, corrupt or encrypted archives
   await assert.rejects(readDocumentBytes('bad.docx',docx('<!DOCTYPE x [<!ENTITY leak SYSTEM "file:///test">]><w:p>&leak;</w:p>')),/INVALID/);
 });
 test('fails oversized text, zip bombs and excessive rows instead of truncating',async()=>{
-  await assert.rejects(readDocumentBytes('huge.txt',encode('x'.repeat(20001))),/TOO_LARGE/);
-  await assert.rejects(readDocumentBytes('huge.txt',new Uint8Array(5*1024*1024+1)),/TOO_LARGE/);
+  await assert.rejects(readDocumentBytes('huge.txt',encode('x'.repeat(TEXT_LIMIT+1))),/TOO_LARGE/);
+  await assert.rejects(readDocumentBytes('huge.txt',new Uint8Array(FILE_LIMIT+1)),/TOO_LARGE/);
   assert.throws(()=>inspectZip(zipSync({'content.xml':encode('x'.repeat(2*1024*1024))})),/TOO_LARGE/);
-  const book=XLSX.utils.book_new();XLSX.utils.book_append_sheet(book,XLSX.utils.aoa_to_sheet(Array.from({length:1002},()=>['dish'])),'TooMany');
+  const book=XLSX.utils.book_new();XLSX.utils.book_append_sheet(book,XLSX.utils.aoa_to_sheet(Array.from({length:SPREADSHEET_ROWS+1},()=>['dish'])),'TooMany');
   await assert.rejects(readDocumentBytes('rows.xlsx',XLSX.write(book,{type:'array',bookType:'xlsx'})),/TOO_LARGE/);
   await assert.rejects(readDocumentBytes('empty.txt',encode(' \n ')),/EMPTY/);
+});
+
+test('larger text, media-heavy Word files and longer tables import without truncation',async()=>{
+  const text='餐'.repeat(TEXT_LIMIT);
+  assert.equal(await readDocumentBytes('large.txt',encode(text)),text);
+  const word=zipSync({'[Content_Types].xml':strToU8('<Types/>'),'word/document.xml':strToU8('<w:p>Rice RM12</w:p>'),'word/media/unused.bin':new Uint8Array(6*1024*1024)},{level:0});
+  assert.ok(word.length>5*1024*1024);
+  assert.equal(await readDocumentBytes('large.docx',word),'Rice RM12');
+  const book=XLSX.utils.book_new();XLSX.utils.book_append_sheet(book,XLSX.utils.aoa_to_sheet(Array.from({length:2000},(_,i)=>['Rice '+i,12])),'Menu');
+  const result=await readDocumentBytes('large.xlsx',XLSX.write(book,{type:'array',bookType:'xlsx'}));
+  assert.ok(result.includes('Rice 1999\t12'));
+});
+
+test('browser accepts files above the former cap but rejects files above the new cap',async()=>{
+  const previous=globalThis.Worker;let worker;
+  globalThis.Worker=class {constructor(){worker=this;}postMessage(){queueMicrotask(()=>this.onmessage({data:{type:'orderweave-document-result',text:'Rice RM12'}}));}terminate(){}};
+  try{
+    assert.equal(await readDocument({name:'large.docx',size:6*1024*1024,arrayBuffer:async()=>new ArrayBuffer(1)}),'Rice RM12');
+    worker=null;await assert.rejects(readDocument({name:'large.docx',size:FILE_LIMIT+1,arrayBuffer:()=>assert.fail('must not read oversized file')}),/TOO_LARGE/);assert.equal(worker,null);
+  }finally{globalThis.Worker=previous;}
 });
 test('document client ignores PDF worker handshake messages until the tagged extraction result',async()=>{
   const previous=globalThis.Worker;let worker;

@@ -1,11 +1,12 @@
+import {FILE_LIMIT,DOCUMENT_READ_TIMEOUT} from './import-limits.js';
 export const DOCUMENT_ACCEPT='.txt,.csv,.tsv,.xlsx,.xls,.ods,.docx,.doc,.odt,.rtf,.pdf';
 export function readDocument(file){
   if(!DOCUMENT_ACCEPT.split(',').some(ext=>file.name.toLowerCase().endsWith(ext)))return Promise.reject(Error('REJECTED'));
-  if(file.size>5*1024*1024)return Promise.reject(Error('TOO_LARGE'));
+  if(file.size>FILE_LIMIT)return Promise.reject(Error('TOO_LARGE'));
   return new Promise((resolve,reject)=>{
     const worker=new Worker(new URL('./document-vendor/reader-worker.js',import.meta.url),{type:'module'});
     const finish=(error,text)=>{clearTimeout(timer);worker.terminate();error?reject(Error(error)):resolve(text);};
-    const timer=setTimeout(()=>finish('INVALID'),30000);
+    const timer=setTimeout(()=>finish('INVALID'),DOCUMENT_READ_TIMEOUT);
     worker.onmessage=event=>{if(event.data?.type==='orderweave-document-result')finish(event.data.error,event.data.text);};worker.onerror=()=>finish('INVALID');
     file.arrayBuffer().then(bytes=>worker.postMessage({type:'orderweave-document-request',name:file.name,bytes},[bytes])).catch(()=>finish('INVALID'));
   });

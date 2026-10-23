@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {readFile,readdir} from 'node:fs/promises';
 import {resolve} from 'node:path';
 import {Miniflare} from 'miniflare';
-const files=['lib/workspace.mjs','public/core.js','public/menu-matching.js','public/delivery-slots.js','public/materials.js','public/merchant-operations.js','public/commerce.js'];
+const files=['public/import-limits.js','lib/workspace.mjs','public/core.js','public/menu-matching.js','public/delivery-slots.js','public/materials.js','public/merchant-operations.js','public/commerce.js'];
 export async function createWorkspaceRuntime(){
  const modules=await Promise.all(files.map(async path=>({type:'ESModule',path:resolve(path),contents:await readFile(path,'utf8')})));
  const runtime=new Miniflare({compatibilityDate:'2026-05-15',d1Databases:['DB'],r2Buckets:['BUCKET'],modules:[{type:'ESModule',path:resolve('tests/workspace-fixture.mjs'),contents:`import {handleWorkspace} from '../lib/workspace.mjs';export default {fetch(request,env){const user=request.headers.get('x-test-user');return handleWorkspace(request,env,user?{userId:user,displayName:'Test '+user}:null);}};`},...modules]});

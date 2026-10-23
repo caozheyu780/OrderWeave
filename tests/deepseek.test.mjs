@@ -15,8 +15,14 @@ test('only sends order text, menu names and local time to the official API',asyn
  assert.equal(result.items[0].minutes,15);assert.equal(result.scheduledAt,'2026-10-22T12:30');assert.deepEqual(result.warnings,['请核对']);
 });
 test('missing secret never makes a provider call',async()=>{await assert.rejects(extractOrder(input,{},()=>assert.fail('must not call')),err=>err.code==='AI_NOT_CONFIGURED'&&err.status===503);});
+
+test('large Unicode order text reaches the provider intact at the new boundary',async()=>{
+ const text='餐'.repeat(100000);let called=false;
+ await extractOrder({...input,text},{DEEPSEEK_API_KEY:'test-only'},async(_url,options)=>{called=true;assert.equal(JSON.parse(JSON.parse(options.body).messages[1].content).text,text);return upstream();});
+ assert.equal(called,true);
+});
 test('invalid input never makes a provider call',async()=>{
- for(const bad of [{...input,text:''},{...input,text:'x'.repeat(20001)},{...input,timeZone:'not/a-zone'},{...input,localNow:'2026-02-30T12:00'},{...input,menu:[{...menu[0],minutes:-1}]},{...input,menu:Array(501).fill(menu[0])}])await assert.rejects(extractOrder(bad,{DEEPSEEK_API_KEY:'test'},()=>assert.fail()),err=>err.code==='INVALID_REQUEST');
+ for(const bad of [{...input,text:''},{...input,text:'x'.repeat(100001)},{...input,timeZone:'not/a-zone'},{...input,localNow:'2026-02-30T12:00'},{...input,menu:[{...menu[0],minutes:-1}]},{...input,menu:Array(501).fill(menu[0])}])await assert.rejects(extractOrder(bad,{DEEPSEEK_API_KEY:'test'},()=>assert.fail()),err=>err.code==='INVALID_REQUEST');
 });
 test('impossible dates, UTC suffixes and invalid hours are not accepted',()=>{for(const date of ['2026-02-30T12:30','2026-10-21T24:00','2026-13-01T00:00','2026-10-22T12:30Z'])assert.equal(validLocalDate(date),false);assert.equal(validLocalDate('2028-02-29T12:30'),true);});
 test('corrects hallucinated menu IDs and prep durations, retains unknown dishes',()=>{

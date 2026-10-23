@@ -29,6 +29,17 @@ test('batch requires review, complete fields and conflict-free names/aliases and
   assert.throws(()=>prepareMenuBatch(entries,Array.from({length:300},(_,i)=>({...dish,id:String(i),name:'other'+i}))),/menuImportLimit/);
 });
 test('invalid menu input and absent secret never call the provider',async()=>{
-  for(const input of [{text:''},{text:'x'.repeat(20001)}])await assert.rejects(extractMenu(input,{DEEPSEEK_API_KEY:'test'},()=>assert.fail()),e=>e.code==='INVALID_REQUEST');
+  for(const input of [{text:''},{text:'x'.repeat(100001)}])await assert.rejects(extractMenu(input,{DEEPSEEK_API_KEY:'test'},()=>assert.fail()),e=>e.code==='INVALID_REQUEST');
   await assert.rejects(extractMenu({text:source},{},()=>assert.fail()),e=>e.code==='AI_NOT_CONFIGURED');
+});
+
+test('large menu input and its source evidence survive the new text boundary',async()=>{
+  const text=source+'餐'.repeat(100000-source.length);
+  const result=await extractMenu({text},{DEEPSEEK_API_KEY:'test-only'},async(_url,options)=>{
+    assert.equal(JSON.parse(JSON.parse(options.body).messages[1].content).text,text);
+    return Response.json({choices:[{finish_reason:'stop',message:{content:JSON.stringify({dishes:[extracted]})}}]});
+  });
+  assert.equal(result.dishes[0].sourceText,extracted.sourceText);
+  const normalized=normalizeMenuOutput({dishes:[{...extracted,sourceText:text}]},text);
+  assert.equal(normalized.dishes[0].sourceText.length,100000);
 });

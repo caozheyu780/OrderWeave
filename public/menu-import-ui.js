@@ -1,3 +1,4 @@
+import {TEXT_LIMIT} from './import-limits.js';
 import {getAIStatus,recognizeMenuWithAI} from './ai-adapter.js';
 import {documentField,wireDocumentImport} from './document-import.js';
 import {menuDraftIssue,prepareMenuBatch} from './menu-import.js';
@@ -20,14 +21,14 @@ export function createMenuImportUI({modal,t,e,account,currentId,openModal,confir
   }
   async function open(){
     batch=null;delete modal.dataset.batchView;
-    openModal(t('menuImportTitle'),`<form id="menu-import-form"><div class="modal-body"><p>${t('menuImportHelp')}</p><div id="menu-ai-notice" class="notice">${t('checkingAI')}</div><label for="menu-source">${t('menuImportSource')}</label><textarea id="menu-source" class="source-text" required maxlength="20000"></textarea>${documentField(t,'menu-document')}<p id="menu-import-error" class="error" role="alert"></p></div><div class="modal-foot sticky">${button('discard',t('cancel'))}<button class="primary" type="submit" disabled>${t('extractAI')}</button></div></form>`);
+    openModal(t('menuImportTitle'),`<form id="menu-import-form"><div class="modal-body"><p>${t('menuImportHelp')}</p><div id="menu-ai-notice" class="notice">${t('checkingAI')}</div><label for="menu-source">${t('menuImportSource')}</label><textarea id="menu-source" class="source-text" required maxlength="${TEXT_LIMIT}"></textarea>${documentField(t,'menu-document')}<p id="menu-import-error" class="error" role="alert"></p></div><div class="modal-foot sticky">${button('discard',t('cancel'))}<button class="primary" type="submit" disabled>${t('extractAI')}</button></div></form>`);
     modal.dataset.menuImport='source';const storeId=currentId(),form=modal.querySelector('form'),source=form.querySelector('textarea'),error=form.querySelector('#menu-import-error'),submit=form.querySelector('[type=submit]');
     let configured=false,extracting=false;
     const isCurrent=()=>modal.open&&currentId()===storeId&&modal.querySelector('#menu-import-form')===form;
     const reading=wireDocumentImport({form,source,input:form.querySelector('#menu-document'),error,t,confirmAction,isCurrent,id:'menu-document',busy:value=>{submit.disabled=value||!configured||extracting;}});
     form.addEventListener('submit',async event=>{
       event.preventDefault();if(!configured||reading()||extracting)return;
-      const text=source.value.trim();if(!text||text.length>20000){error.textContent=t('document_TOO_LARGE');return;}
+      const text=source.value.trim();if(!text||text.length>TEXT_LIMIT){error.textContent=t('document_TOO_LARGE');return;}
       extracting=true;submit.disabled=true;submit.textContent=t('busy');error.textContent='';form.querySelector('#menu-document').disabled=true;source.readOnly=true;
       try{const result=await recognizeMenuWithAI(text,storeId);if(!isCurrent())return;
         const next={storeId,warnings:result.warnings||[],entries:result.dishes.map(d=>({draft:{...d,id:crypto.randomUUID()},reviewed:false}))};next.id=await beginBatch(next.entries.map(e=>e.draft.id));if(!isCurrent())return;batch=next;show();
