@@ -809,3 +809,11 @@ Future entry format:
 - Packaged and pushed tested source cdf794c29b64e7ca6f6b41b1da3d8db07c5b3295 with archive D:/hack/orderweave-menu-export-deploy.tar.gz (420,881 compressed bytes). Saved Site version 17: appgprj_6ad8c26e2618819193b8337bdb29a5cf~appgver_72a9d5912bc88191b72facd82add0040.
 - Deployment appgdep_6adb0426ad10819182404875d684e23a succeeded at 14:52:45 local time on the same Site URL. Kept the existing custom four-user audience, environment revision 1, local storage mode and provider configuration.
 - Audited all 90 tracked UTF-8 source files for accidental runtime/binary files and common credential patterns. Preparing eight changed files for private GitHub main while preserving the five collaborator-only reference files. The attachment, extracted screenshots, generated menu PNG/PDF, browser records and credentials remain excluded from GitHub source.
+
+
+### 2026-10-23 14:54:10 +08:00 — Verify export release and GitHub synchronization
+
+- Updated private GitHub main to b9a9e7a708d15caa412c9c56fd5503fe05d528aa with its expected previous head and without force. Verified all 90 local source/test/documentation blobs in tree d5e854f16188c03542125a2bc72af6815b868edf, plus all five retained collaborator-only files (95 total). Branch readback matched the commit.
+- Refreshed the existing Site deliverable tab and confirmed its unchanged ChatGPT access gate. No production merchant/buyer session or runtime record was opened or changed. Native publication succeeded for version 17; local visual comparisons, real PNG/PDF downloads and PDF rendering provide the feature evidence.
+- Stopped the owned loopback preview; its plain process was terminated by the host without teardown counters. Removing only this turn's temporary integration/audit/transfer/parser helpers and extracted copies of the two report images. The supplied Word attachment remains untouched; generated QA screenshots/menu files and the release archive remain in D:/hack outside the source checkout. No browser business data was deleted.
+- Synchronizing this final English release log. The two requested fixes are complete; a documentation-only log update does not require another Site deployment.
