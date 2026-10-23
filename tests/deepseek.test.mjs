@@ -16,6 +16,15 @@ test('only sends order text, menu names and local time to the official API',asyn
 });
 test('missing secret never makes a provider call',async()=>{await assert.rejects(extractOrder(input,{},()=>assert.fail('must not call')),err=>err.code==='AI_NOT_CONFIGURED'&&err.status===503);});
 
+test('optional menu preparation time does not block AI and cannot be invented by its response',async()=>{
+ for(const minutes of [null,undefined]){
+  const result=await extractOrder({...input,menu:[{...menu[0],minutes}]},{DEEPSEEK_API_KEY:'test-only'},async(_url,options)=>{
+   assert.equal(JSON.parse(JSON.parse(options.body).messages[1].content).menu[0].minutes,null);
+   return upstream({...order,items:[{...order.items[0],minutes:25}]});
+  });assert.equal(result.items[0].minutes,0);
+ }
+});
+
 test('large Unicode order text reaches the provider intact at the new boundary',async()=>{
  const text='餐'.repeat(100000);let called=false;
  await extractOrder({...input,text},{DEEPSEEK_API_KEY:'test-only'},async(_url,options)=>{called=true;assert.equal(JSON.parse(JSON.parse(options.body).messages[1].content).text,text);return upstream();});

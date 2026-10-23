@@ -2,6 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createLocalWorkspace,DEMO_KEY} from '../public/local-workspace.js';
 import {cents,priceItem,validateCommerce,CURRENCY,cnyReference} from '../public/commerce.js';
+import {preparationEstimate} from '../public/order-timing.js';
+import {kitchenSummary} from '../public/merchant-operations.js';
 class Storage{values=new Map();fail=false;getItem(k){return this.values.get(k)??null;}setItem(k,v){if(this.fail)throw Error('QuotaExceededError');this.values.set(k,String(v));}removeItem(k){this.values.delete(k);}}
 const now=()=>new Date('2026-10-23T04:00:00Z');
 const owner={action:'create',shop:'Fictional food shop',username:'owner-test',operatorName:'Test owner',password:'test-merchant-123',repeatPassword:'test-merchant-123'};
@@ -10,6 +12,19 @@ const dish={id:'dish',name:'Rice bowl',description:'Fictional bowl',ingredients:
 const line={dishId:'dish',selections:{size:['large'],extras:['egg']},quantity:2,notes:'Less salt'};
 async function fixture(){const storage=new Storage(),api=()=>createLocalWorkspace({storage,sessionStorage:new Storage(),now}),merchant=api(),m=await merchant.request(owner);await merchant.request({action:'save',merchantId:m.id,expectedRevision:0,menu:[dish],orders:[]});const buyer=api();await buyer.request(login);return {storage,api,merchant,buyer,id:m.id};}
 async function cart(f){await f.buyer.request({action:'buyer_cart_add',storeId:f.id,...line});await f.buyer.request({action:'buyer_address',name:'Fictional buyer',phone:login.phone,location:'Fictional street 1'});const state=await f.buyer.request({action:'buyer_state'}),quote=await f.buyer.request({action:'buyer_quote'});return {state,quote,input:{action:'buyer_checkout',requestId:'checkout-test',quoteToken:quote.quoteToken,addressId:state.profile.addresses[0].id,scheduledAt:'2026-10-24T12:00',scheduledEndAt:'2026-10-24T12:30',paymentMethod:'local_wallet'}};}
+
+test('unknown preparation time persists through buyer checkout and merchant acceptance',async()=>{
+ const f=await fixture();let state=await f.merchant.request({},'?merchantId='+f.id);
+ const menu=[{...state.menu[0],minutes:null}];state=await f.merchant.request({action:'save',merchantId:f.id,expectedRevision:state.revision,menu,orders:[]});
+ assert.equal(state.menu[0].minutes,null);
+ for(const minutes of [0,-1,1.5,1441,''])await assert.rejects(f.merchant.request({action:'save',merchantId:f.id,expectedRevision:state.revision,menu:[{...menu[0],minutes}],orders:[]}),/INVALID_DATA/);
+ const checkout=await cart(f);await f.buyer.request(checkout.input);
+ state=await f.merchant.request({},'?merchantId='+f.id);const order=state.orders[0];assert.equal(order.items[0].minutes,null);assert.deepEqual(preparationEstimate(order),{minutes:0,incomplete:true});
+ state=await f.merchant.request({action:'buyer_decide',merchantId:f.id,expectedRevision:state.revision,id:order.id,decision:'accept'});
+ const group=kitchenSummary(state.orders).groups[0];assert.equal(group.minutes,0);assert.equal(group.incompleteTime,true);
+ const persisted=await f.merchant.request({action:'save',merchantId:f.id,expectedRevision:state.revision,menu:[{...menu[0],minutes:12}],orders:state.orders});
+ assert.equal(persisted.orders[0].items[0].minutes,null);
+});
 test('money uses exact minor units; required options, duplicates and invalid prices are rejected',()=>{
  assert.equal(CURRENCY,'MYR');assert.equal(cents('10.05'),1005);assert.equal(cents('0'),0);assert.equal(cents('999999.99'),99999999);for(const x of ['-1','1.001','NaN','1e3','1000000',''])assert.throws(()=>cents(x),/PRICE_INVALID/);
  const p=priceItem(dish,line);assert.equal(p.unitPriceCents,1450);assert.equal(p.lineTotalCents,2900);assert.equal(p.options.length,2);assert.ok(cnyReference(100)>100);

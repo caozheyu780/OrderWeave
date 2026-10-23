@@ -23,8 +23,10 @@ test('batch requires review, complete fields and conflict-free names/aliases and
   const old=[{...dish,id:'old',name:'米饭',aliases:['rice']}],entries=[{draft:dish,reviewed:true}],snapshot=structuredClone({old,entries});
   const result=prepareMenuBatch(entries,old);assert.equal(result.length,1);assert.ok(!('sourceText' in result[0]));assert.deepEqual({old,entries},snapshot);
   const blankDescription=prepareMenuBatch([{draft:{...dish,description:''},reviewed:true}],old);assert.equal(blankDescription[0].description,'');
+  for(const minutes of [null,undefined]){const optional=prepareMenuBatch([{draft:{...dish,minutes},reviewed:true}],old);assert.equal(optional[0].minutes,null);}
+  for(const minutes of [0,-1,1.5,1441,''])assert.equal(menuDraftIssue({...dish,minutes}), 'duration');
   assert.throws(()=>prepareMenuBatch([{draft:dish,reviewed:false}],old),/menuImportReviewRequired/);
-  for(const field of ['priceCents','minutes','image','description','ingredients']){const incomplete={...dish};delete incomplete[field];assert.ok(menuDraftIssue(incomplete,old));assert.throws(()=>prepareMenuBatch([{draft:incomplete,reviewed:true}],old));}
+  for(const field of ['priceCents','image','description','ingredients']){const incomplete={...dish};delete incomplete[field];assert.ok(menuDraftIssue(incomplete,old));assert.throws(()=>prepareMenuBatch([{draft:incomplete,reviewed:true}],old));}
   assert.throws(()=>prepareMenuBatch([{draft:{...dish,aliases:['rice']},reviewed:true}],old),/aliasesConflict/);
   assert.throws(()=>prepareMenuBatch([...entries,{draft:{...dish,id:'dish2'},reviewed:true}],old),/aliasesConflict/);
   assert.throws(()=>prepareMenuBatch(entries,Array.from({length:300},(_,i)=>({...dish,id:String(i),name:'other'+i}))),/menuImportLimit/);

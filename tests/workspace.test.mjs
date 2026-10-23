@@ -3,6 +3,13 @@ import assert from 'node:assert/strict';
 import {readFile,readdir} from 'node:fs/promises';
 import {resolve} from 'node:path';
 import {Miniflare} from 'miniflare';
+import {validateWorkspaceData} from '../lib/workspace.mjs';
+
+test('workspace accepts absent preparation times while rejecting invalid supplied numbers',()=>{
+ const dish={id:'rice',name:'Rice',description:'',image:'data:image/png;base64,YQ==',ingredients:[{name:'Rice',quantity:100,unit:'g'}]};
+ for(const minutes of [null,undefined])assert.equal(validateWorkspaceData({menu:[{...dish,minutes}],orders:[]}).menu[0].minutes,null);
+ for(const minutes of [0,-1,1.5,1441,''])assert.throws(()=>validateWorkspaceData({menu:[{...dish,minutes}],orders:[]}),e=>e.code==='INVALID_DATA');
+});
 const files=['public/import-limits.js','lib/workspace.mjs','public/core.js','public/menu-matching.js','public/delivery-slots.js','public/materials.js','public/merchant-operations.js','public/commerce.js'];
 export async function createWorkspaceRuntime(){
  const modules=await Promise.all(files.map(async path=>({type:'ESModule',path:resolve(path),contents:await readFile(path,'utf8')})));

@@ -5,6 +5,7 @@ const order={scheduledAt:'2026-10-22T12:00',scheduledEndAt:'2026-10-22T12:30',st
 test('preparation estimates multiply servings and flag unknown custom dish durations',()=>{
  assert.deepEqual(preparationEstimate({items:[{minutes:15,quantity:2},{minutes:5,quantity:3}]}),{minutes:45,incomplete:false});
  assert.deepEqual(preparationEstimate({items:[{minutes:0,quantity:1},{minutes:10,quantity:1}]}),{minutes:10,incomplete:true});
+ assert.deepEqual(preparationEstimate({items:[{minutes:null,quantity:2}]}),{minutes:0,incomplete:true});
 });
 test('urgency uses slot start, strictly less than twenty minutes and includes overdue',()=>{
  assert.equal(orderTiming(order,new Date('2026-10-22T11:40').getTime()).state,'normal');

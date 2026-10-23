@@ -16,6 +16,8 @@ OrderWeave 是面向小型餐饮店铺的菜单、外卖订单与配送管理平
 
 ## Buyer ordering (browser-local)
 
+Dish descriptions and preparation times are optional in manual entry, edits and AI menu review. Blank times are stored as `null`; a provided time must be a whole number from 1 to 1,440 minutes. Menu/catalog views show that the time is not provided. Order and kitchen estimates sum known times and flag incomplete estimates, while existing orders keep their original time snapshots.
+
 The sign-in screen offers Buyer sign-in and the merchant portal. Buyers use a phone number and a password (6–200 characters). A new phone number automatically creates a local buyer account; an existing number requires its original password. There is no SMS verification or password recovery service. Buyer passwords use the same salted PBKDF2 hashing as merchant accounts. The first sign-in opens profile setup with a random alphanumeric display name and an optional photo; leaving the photo blank uses a neutral blank avatar. Photos are resized locally. Phone numbers, profiles, addresses and carts remain browser runtime data and are excluded from source uploads.
 
 Merchants add a base price in RM, an optional category, and up to eight option groups per dish. Groups may be required/optional and single/multiple choice, with up to twenty choices and nonnegative price surcharges. Prices have at most two decimals and are stored/calculated as integer sen. Existing dishes without prices remain visible but cannot be ordered until priced. Categories appear in catalog/menu browsing only, never on merchant order cards or details. Option surcharges affect price; recipe quantities/preparation times still use the merchant's per-serving dish recipe/time.
