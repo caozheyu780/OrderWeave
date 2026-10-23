@@ -1,22 +1,21 @@
 import {TEXT_LIMIT} from './import-limits.js';
 import {getAIStatus,recognizeMenuWithAI} from './ai-adapter.js';
 import {documentField,wireDocumentImport} from './document-import.js';
-import {menuDraftIssue,prepareMenuBatch} from './menu-import.js';
+import {menuBatchStatus,prepareMenuBatch} from './menu-import.js';
 import {money} from './commerce.js';
 
 export function createMenuImportUI({modal,t,e,account,currentId,openModal,confirmAction,dishForm,saveAccount,render,toast,aiMessage,beginBatch,recordBatch}){
   let batch=null;
-  const button=(name,label,id='',disabled=false)=>`<button type="button" data-menu-import="${name}" data-id="${e(id)}" ${disabled?'disabled':''}>${e(label)}</button>`;
+  const button=(name,label,id='',disabled=false)=>`<button type="button" data-menu-import="${name}" data-id="${e(id)}" ${name==='save'?'aria-describedby="menu-import-status"':''} ${disabled?'disabled':''}>${e(label)}</button>`;
   const active=()=>modal.open&&!!modal.querySelector('#menu-import-form,#menu-import-list,#dish-form[data-menu-review]');
   const summary=d=>[d.name,d.priceCents==null?t('unpriced'):money(d.priceCents),d.category||'',d.description||'',...(d.ingredients||[]).map(r=>`${r.name} ${r.quantity??'?'} ${r.unit||'?'}`),d.minutes==null?'':d.minutes+' '+t('minutes'),...(d.optionGroups||[]).map(g=>g.name+': '+g.choices.map(c=>c.name+' +'+(c.priceCents==null?'?':money(c.priceCents))).join(' / '))].filter(Boolean).join('\n');
   function clear(){batch=null;delete modal.dataset.menuImport;modal.close();}
   function show(){
     if(!batch||batch.storeId!==currentId())return clear();
-    const entries=batch.entries;
-    openModal(t('menuImportReview'),`<div class="modal-body"><p class="notice">${t('menuImportReviewHelp')}</p>${batch.warnings.length?`<p class="notice">${batch.warnings.map(e).join('<br>')}</p>`:''}<div id="menu-import-list" class="batch-review-list">${entries.map((entry,i)=>{
-      const issue=menuDraftIssue(entry.draft,[...account().menu,...entries.filter(v=>v!==entry).map(v=>v.draft)]);
-      return `<article class="batch-card"><h3>${i+1}. ${e(entry.draft.name)}</h3><div class="batch-summary">${e(summary(entry.draft))}</div>${entry.draft.warnings?.length?`<p class="notice">${entry.draft.warnings.map(e).join('<br>')}</p>`:''}${issue?`<p class="error">${t('menuImportMissing')}: ${t(issue)}</p>`:''}<p>${t(entry.reviewed&&!issue?'batchReady':'menuImportNeedsReview')}</p><div class="row">${button('edit',t('batchEdit'),entry.draft.id)}${button('remove',t('menuImportRemove'),entry.draft.id)}</div><details><summary>${t('menuImportEvidence')}</summary><p class="detail-value" style="white-space:pre-wrap">${e(entry.draft.sourceText||'')}</p></details></article>`;
-    }).join('')}</div><p id="menu-import-error" class="error" role="alert"></p></div><div class="modal-foot sticky">${button('discard',t('cancel'))}${button('save',t('menuImportConfirm'),'',!entries.length||entries.some(v=>!v.reviewed||menuDraftIssue(v.draft,[...account().menu,...entries.filter(x=>x!==v).map(x=>x.draft)])))}</div>`);
+    const entries=batch.entries,status=menuBatchStatus(entries,account().menu);
+    openModal(t('menuImportReview'),`<div class="modal-body"><p class="notice">${t('menuImportReviewHelp')}</p>${batch.warnings.length?`<p class="notice">${batch.warnings.map(e).join('<br>')}</p>`:''}<div id="menu-import-list" class="batch-review-list">${status.rows.map(({entry,index,issue})=>{
+      return `<article class="batch-card"><h3>${index+1}. ${e(entry.draft.name)}</h3><div class="batch-summary">${e(summary(entry.draft))}</div>${entry.draft.warnings?.length?`<p class="notice">${entry.draft.warnings.map(e).join('<br>')}</p>`:''}${issue?`<p class="error">${t('menuImportMissing')}: ${t(issue)}</p>`:''}<p>${t(issue?'menuImportNeedsReview':'menuImportComplete')}</p><div class="row">${button('edit',t('batchEdit'),entry.draft.id)}${button('remove',t('menuImportRemove'),entry.draft.id)}</div><details><summary>${t('menuImportEvidence')}</summary><p class="detail-value" style="white-space:pre-wrap">${e(entry.draft.sourceText||'')}</p></details></article>`;
+    }).join('')}</div><p id="menu-import-error" class="error" role="alert"></p></div><div class="modal-foot sticky menu-review-footer"><div id="menu-import-status" role="status" aria-live="polite"><b>${t('menuImportCompleteCount')}: ${status.completeCount}/${status.total}</b> · ${t('menuImportIncompleteCount')}: ${status.incompleteCount}<div class="${status.canConfirm?'muted':'error'}">${!status.total?t('menuImportEmpty'):status.limitExceeded?t('menuImportLimit'):status.firstIncomplete?'#'+(status.firstIncomplete.index+1)+' '+e(status.firstIncomplete.entry.draft.name)+' · '+t('menuImportMissing')+': '+t(status.firstIncomplete.issue):t('menuImportAllComplete')}</div></div><div class="row wrap">${button('discard',t('cancel'))}${status.firstIncomplete?button('next-incomplete',t('menuImportNextIncomplete')):''}${button('save',t('menuImportConfirm'),'',!status.canConfirm)}</div></div>`);
     modal.dataset.menuImport='list';
   }
   async function open(){
@@ -31,7 +30,7 @@ export function createMenuImportUI({modal,t,e,account,currentId,openModal,confir
       const text=source.value.trim();if(!text||text.length>TEXT_LIMIT){error.textContent=t('document_TOO_LARGE');return;}
       extracting=true;submit.disabled=true;submit.textContent=t('busy');error.textContent='';form.querySelector('#menu-document').disabled=true;source.readOnly=true;
       try{const result=await recognizeMenuWithAI(text,storeId);if(!isCurrent())return;
-        const next={storeId,warnings:result.warnings||[],entries:result.dishes.map(d=>({draft:{...d,id:crypto.randomUUID()},reviewed:false}))};next.id=await beginBatch(next.entries.map(e=>e.draft.id));if(!isCurrent())return;batch=next;show();
+        const next={storeId,warnings:result.warnings||[],entries:result.dishes.map(d=>({draft:{...d,id:crypto.randomUUID()}}))};next.id=await beginBatch(next.entries.map(e=>e.draft.id));if(!isCurrent())return;batch=next;show();
       }catch(err){if(isCurrent())error.textContent=/^(AI_|AUTH_REQUIRED|INVALID_REQUEST|REQUEST_TOO_LARGE)/.test(err.message)?aiMessage(err.message):t('cloud_'+err.message);}finally{extracting=false;submit.disabled=!configured;submit.textContent=t('extractAI');source.readOnly=false;form.querySelector('#menu-document').disabled=false;}
     });
     try{const status=await getAIStatus();if(!isCurrent())return;configured=!!status.configured;submit.disabled=!configured||reading();form.querySelector('#menu-ai-notice').textContent=configured?t('menuAIReady'):aiMessage('AI_NOT_CONFIGURED');}catch(err){if(isCurrent())form.querySelector('#menu-ai-notice').textContent=aiMessage(err.message);}
@@ -44,10 +43,10 @@ export function createMenuImportUI({modal,t,e,account,currentId,openModal,confir
   }
   modal.addEventListener('click',async event=>{
     const target=event.target.closest('[data-menu-import]');if(!target)return;
-    const action=target.dataset.menuImport,entry=batch?.entries.find(v=>v.draft.id===target.dataset.id);
+    const action=target.dataset.menuImport,entry=action==='next-incomplete'&&batch?menuBatchStatus(batch.entries,account().menu).firstIncomplete?.entry:batch?.entries.find(v=>v.draft.id===target.dataset.id);
     if(action==='discard')close();
     if(action==='remove'&&entry){try{await recordBatch(batch.id,'remove',entry.draft.id);batch.entries=batch.entries.filter(v=>v!==entry);show();}catch(error){toast(t('cloud_'+error.message));}}
-    if(action==='edit'&&entry){dishForm(null,entry.draft,async dish=>{try{await recordBatch(batch.id,'edit',entry.draft.id);entry.draft={...dish,sourceText:entry.draft.sourceText,warnings:entry.draft.warnings};entry.reviewed=true;show();}catch(error){toast(t('cloud_'+error.message));}});modal.dataset.menuImport='edit';}
+    if((action==='edit'||action==='next-incomplete')&&entry){dishForm(null,entry.draft,async dish=>{try{await recordBatch(batch.id,'edit',entry.draft.id);entry.draft={...dish,sourceText:entry.draft.sourceText,warnings:entry.draft.warnings};show();}catch(error){toast(t('cloud_'+error.message));}});modal.dataset.menuImport='edit';}
     if(action==='save'&&batch){
       const current=batch;let dishes;try{dishes=prepareMenuBatch(current.entries,account().menu);}catch(err){modal.querySelector('#menu-import-error').textContent=t(err.message);return;}
       confirmAction(t('menuImportConfirm'),t('menuImportConfirmHelp'),dishes.map(summary).join('\n\n'),async()=>{
