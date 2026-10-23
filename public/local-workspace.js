@@ -1,6 +1,8 @@
 import {validateOrder} from './core.js';
 import {cleanAliases,conflictingDish} from './menu-matching.js';
 import {validateRecipe} from './materials.js';
+import {validateCommerce} from './commerce.js';
+import {createBuyerHandler} from './buyer-store.js';
 
 export const DEMO_KEY='orderweave-demo-v1',DEMO_SESSION='orderweave-demo-session';
 const LEGACY_KEY='takeaway-desk-v1';
@@ -18,6 +20,7 @@ const normalizeCode=value=>text(value,100).replace(/[\s-]/g,'').toUpperCase();
 export function createLocalWorkspace({storage,sessionStorage,crypto:crypt=globalThis.crypto,now=()=>new Date(),lock=globalThis.navigator?.locks?fn=>navigator.locks.request('orderweave-demo-write',fn):fallbackLock}){
   const uid=()=>crypt.randomUUID(),at=()=>now().toISOString();
   async function passwordHash(password,salt){const material=await crypt.subtle.importKey('raw',new TextEncoder().encode(password),'PBKDF2',false,['deriveBits']);const bits=await crypt.subtle.deriveBits({name:'PBKDF2',salt:new Uint8Array(salt),iterations:150000,hash:'SHA-256'},material,256);return [...new Uint8Array(bits)].map(n=>n.toString(16).padStart(2,'0')).join('');}
+  const buyerRequest=createBuyerHandler({sessionStorage,crypt,now,passwordHash,uid,commit,audit});
   function ensureStoreCode(context,store){
     if(store.storeCode)return false;
     let code;do{code=[...crypt.getRandomValues(new Uint8Array(12))].map(n=>codeAlphabet[n&31]).join('').match(/.{4}/g).join('-');}while(context.data.stores.some(s=>normalizeCode(s.storeCode)===normalizeCode(code)));
@@ -46,12 +49,14 @@ export function createLocalWorkspace({storage,sessionStorage,crypto:crypt=global
   function validateData(input){
     if(!Array.isArray(input.menu)||!Array.isArray(input.orders)||input.menu.length>300||input.orders.length>10000)fail('INVALID_DATA');const menu=copy(input.menu),orders=copy(input.orders),ids=new Set();
     for(const dish of menu){if(!dish||!text(dish.id)||ids.has(dish.id)||typeof dish.name!=='string'||!dish.name.trim()||dish.name.length>100||typeof dish.description!=='string'||dish.description.length>2000||!Number.isInteger(dish.minutes)||dish.minutes<1||dish.minutes>1440||typeof dish.image!=='string'||!/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(dish.image))fail('INVALID_DATA');ids.add(dish.id);dish.aliases=cleanAliases(dish.aliases||[],dish.name);if(typeof dish.ingredients==='string'){if(!dish.ingredients.trim())fail('INVALID_DATA');}else{try{dish.ingredients=validateRecipe(dish.ingredients);}catch{fail('INVALID_DATA');}}if(conflictingDish(menu.filter(d=>d.id!==dish.id),dish))fail('INVALID_DATA');}
+    menu.forEach(validateCommerce);
     ids.clear();for(const order of orders){if(!order||!text(order.id)||ids.has(order.id)||validateOrder(order)||!['pending','preparing','delivering','delivered'].includes(order.status))fail('INVALID_DATA');ids.add(order.id);}return {menu,orders};
   }
   async function request(input={},query=''){
     const mutate=Object.keys(input).length>0;
     const run=async()=>{
       const context=read(),data=context.data;
+      if(typeof input.action==='string'&&input.action.startsWith('buyer_'))return buyerRequest(context,input);
       if(!mutate){const params=new URLSearchParams(query.replace(/^\?/,'')),storeId=params.get('merchantId');
         if(!storeId){const selected=session(),store=data.stores.find(s=>s.id===selected?.storeId),actor=store?.members.find(m=>m.id===selected?.actorId&&!m.disabled);return {identity:actor?{name:actor.username}:null,memberships:actor?[{id:actor.id,merchantId:store.id,shop:store.shop,name:actor.name,role:actor.role}]:[],legacyAccountCount:data.stores.filter(s=>s.restoredLegacy).length};}
         const {store,actor}=actorFor(data,storeId);
@@ -79,6 +84,7 @@ export function createLocalWorkspace({storage,sessionStorage,crypto:crypt=global
         if(input.action==='save'||input.action==='migrate'){
           if(input.expectedRevision!==store.revision)fail('CONFLICT');const imported=input.action==='migrate';if(imported&&(actor.role!=='owner'||store.menu.length||store.orders.length))fail('MIGRATION_EMPTY_ONLY');
           const next=validateData(input);
+          for(const row of next.orders){const old=store.orders.find(o=>o.id===row.id);if(old?.source==='buyer'){for(const key of ['source','buyerId','checkoutId','items','totalCents','currency','payment'])if(JSON.stringify(row[key])!==JSON.stringify(old[key]))fail('PAID_ORDER_LOCKED');}else if(row.source==='buyer'||row.buyerId||row.payment)fail('INVALID_DATA');}
           for(const kind of ['menu','orders']){const previous=new Map(store[kind].map(row=>[row.id,row]));for(const row of next[kind]){const old=previous.get(row.id);previous.delete(row.id);if(JSON.stringify(old)===JSON.stringify(row))continue;if(kind==='orders'){if(old?.status==='delivered')fail('DELIVERED_LOCKED');if(!imported){row.updatedAt=at();if(!old)row.createdAt=at();if(row.status==='delivered'&&old?.status!=='delivered')row.deliveredAt=at();}}
             audit(store,actor,imported?(kind==='menu'?'dish_import':'order_import'):kind==='menu'?(old?'dish_update':'dish_add'):row.status==='delivered'?'order_deliver':old?'order_update':'order_add',kind==='menu'?row.name:row.number);}
             for(const old of previous.values()){if(kind==='orders')fail('ORDER_DELETE_FORBIDDEN');audit(store,actor,'dish_delete',old.name);}}

@@ -2,6 +2,20 @@
 
 OrderWeave 是面向小型餐饮店铺的菜单、外卖订单与配送管理平台，使用 DeepSeek 服务端接口解析订单文字。
 
+## Buyer ordering (browser-local)
+
+The sign-in screen offers Buyer sign-in and the merchant portal. Buyers use a phone number and a password (6–200 characters). A new phone number automatically creates a local buyer account; an existing number requires its original password. There is no SMS verification or password recovery service. Buyer passwords use the same salted PBKDF2 hashing as merchant accounts. The first sign-in opens profile setup with a random alphanumeric display name and an optional photo; leaving the photo blank uses a neutral blank avatar. Photos are resized locally. Phone numbers, profiles, addresses and carts remain browser runtime data and are excluded from source uploads.
+
+Merchants add a base price in RM, an optional category, and up to eight option groups per dish. Groups may be required/optional and single/multiple choice, with up to twenty choices and nonnegative price surcharges. Prices have at most two decimals and are stored/calculated as integer sen. Existing dishes without prices remain visible but cannot be ordered until priced. Categories appear in catalog/menu browsing only, never on merchant order cards or details. Option surcharges affect price; recipe quantities/preparation times still use the merchant's per-serving dish recipe/time.
+
+Buyers browse stores and categories, choose dish options, quantity and item notes, and add lines to their persistent cart. A cart belongs to one store; complete or explicitly clear it before adding another store's dishes. Checkout revalidates the current menu, option availability and total, then asks for a saved/new delivery address, half-hour delivery window, order notes and payment method. A final confirmation precedes any order creation. No shipping fee, tax or discount is configured in this release; checkout explicitly shows zero delivery fee.
+
+**No real payment gateway is connected.** Wallet and card selections are clearly labeled local simulations; they record `simulated_paid` and never collect card details or charge money. Cash on delivery records `due`. Orders, payment records and cart clearing are committed together in one local storage transaction, with idempotent checkout identifiers to prevent repeated submissions. A failed or stale quote/save creates no order and leaves the cart intact. Buyer orders become immediately readable by this store's merchant accounts in the same browser. Merchants can update delivery details/status, while checkout items, options, totals and payment records remain fixed. Original recipe and price snapshots survive later menu edits. Buyer history reads the latest merchant order status.
+
+MYR is the settlement currency. Small CNY amounts are indicative only and use a **fixed dated reference**, not a live rate or a second charge. The initial snapshot uses ECB euro reference rates for 2026-10-22: [MYR 4.5756 per EUR](https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/eurofxref-graph-myr.en.html) and [CNY 7.4786 per EUR](https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/eurofxref-graph-cny.en.html); CNY per MYR is their ratio. The source/date is visible in the buyer UI; update the snapshot in `public/commerce.js` when needed. Saved MYR order amounts do not change with this reference.
+
+Buyer and merchant sessions are separate so switching portals retains the corresponding signed-in account. All data remains scoped to the same browser/origin; different devices do not synchronize. The site's existing ChatGPT access gate remains in place before either local portal. Buyer ordering does not make the site public or add cloud authentication/payment services. Back up merchant business data regularly; the existing merchant export contains that store's menu/orders, not all buyer passwords, profiles or carts.
+
 GitHub 源码仓库：[caozheyu780/OrderWeave](https://github.com/caozheyu780/OrderWeave)（私有）。
 
 ## Current mode: browser-local storage

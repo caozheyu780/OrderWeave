@@ -723,3 +723,46 @@ Future entry format:
 - Updated private GitHub main to 29bc988a1dc20b3eb12b5905269948a54979d3f5 using its expected prior head without force. Verified all 80 local source file blob hashes against tree 5356c612249fe6467e322e35be2b4fe4ec867bca, plus all five retained collaborator-only reference files (85 total). Branch readback confirmed the new commit.
 - Refreshed the live Site deliverable tab. It retains its existing ChatGPT access gate; no production merchant session or data was opened. Native deployment success verifies version 15 publication; local browser checks cover account/code/log UI and the full regression suite covers behavior. No real AI call was required for this membership/log-only change.
 - Stopped the owned loopback preview (the execution host terminated its plain process; no teardown counters were emitted). Removing only this turn's temporary edit/transfer/audit helper files. Retaining D:/hack/orderweave-accounts.jpg and the release archive. Synchronizing this final English release entry without a documentation-only Site redeployment.
+
+
+### 2026-10-22 19:28:33 +08:00 — Final verification
+
+- Read back GitHub main at final documentation commit 445e95141d4452103ffaa07503e795500b8e0445. Temporary turn-owned transfer helpers are removed, and only the expected local WORK_LOG.md completion appendix remains uncommitted. The published Site stays on checked source 0256fb8fbd0fa86547ec483a81782d9f2fe654f2, version 15. This appendix does not trigger recursive log commits or redeployment.
+
+
+### 2026-10-23 12:09:40 +08:00 — Begin buyer ordering and priced catalog
+
+- Read project instructions, work log and active local workspace/order/menu code. Reopened the existing Site source at 0256fb8fbd0fa86547ec483a81782d9f2fe654f2, preserving its custom audience, local storage mode and provider secrets.
+- Implementing separate phone/password buyer accounts with salted password hashes, optional profile/avatar, per-buyer persistent cart and addresses, catalog browsing, option-based prices and transactional local checkout. Buyer checkout writes into the same merchant order collection, with authoritative price/recipe snapshots, idempotent retries and revision checks against stale quotations.
+- User selected MYR as primary currency with a small CNY reference amount. Checking ECB primary rate pages for a dated reference; the XML endpoint was rejected by the browser fetch parser for its content type. No rate has been invented. Local payment will be explicitly labeled as a simulation with no real debit; cash on delivery remains unpaid.
+- Existing menu records stay intact and require a price before buyer ordering. Categories are for menu browsing only. Paid buyer line items/payment totals will be protected when merchants edit delivery details or statuses. Preparing UI, meaningful regression tests and browser verification.
+
+
+### 2026-10-23 12:18:44 +08:00 — Implement and verify buyer checkout
+
+- Added commerce validation and exact integer-cent pricing, buyer account/cart/address/checkout handling, localized buyer screens and merchant pricing/group editing. Prices settle in MYR with a small CNY reference. ECB pages report EUR reference rates MYR 4.5756 and CNY 7.4786 for 2026-10-22; conversion uses their ratio and displays the source/date. This is a fixed dated reference, not a live payment rate.
+- All 94 regression tests passed, including 8 new buyer/commerce tests for auto-registration/login, hash privacy, optional profile photo, address/cart persistence, required/add-on choices, exact totals, idempotency, stale quotes, quota rollback, store/buyer isolation, cash unpaid status, recipe snapshots and merchant financial-field protection. TypeScript, syntax and whitespace checks passed.
+- Browser QA used only fictional loopback data: added a price, category and required size group to the pre-existing test dish; accepted generated buyer name/blank avatar; selected a surcharge and two portions; confirmed RM 44.00 total; verified missing-address blocking and cancellation without submission; completed simulated local payment; read the same order in the merchant portal with options/materials/payment and no category; changed status to preparing and read it back as the buyer. No real payment/provider call or production merchant data was used.
+- Saved D:/hack/orderweave-buyer-checkout.jpg, D:/hack/orderweave-buyer-order.jpg and D:/hack/orderweave-buyer-merchant.jpg. One status locator matched both the background filter and modal field; scoping it to the modal resolved the browser check. Added fuller final confirmation summaries and screen titles based on QA. Completing language/responsive checks and documentation before packaging.
+
+
+### 2026-10-23 12:20:30 +08:00 — Complete buyer UI review and release documentation
+
+- Verified buyer session/profile persistence after reload and switched the storefront through Malay, English and Chinese. All 494 combined message keys match across languages, and no competition/demonstration branding was introduced. Merchant-entered category/dish text remains unchanged when switching interface languages.
+- Confirmed paid buyer items/quantities are disabled in the merchant editor; an approved preparation-status update retained prices, item notes and recipe snapshots, and appeared in buyer history. The confirmation UI now includes addresses and delivery windows; merchant menu confirmations now include prices, categories and option surcharges. Saved D:/hack/orderweave-buyer-menu.jpg with the completed catalog; earlier checkout/order/merchant screenshots remain available.
+- Read responsive-preview guidance and viewport capability restrictions, retained the normal browser viewport, and inspected the new mobile CSS breakpoints rather than changing browser dimensions without a user request. No narrow-viewport execution is claimed. Browser QA used fictional localhost data only.
+- Documented buyer account behavior, local-only storage, catalog pricing/categories/options, fixed MYR financial snapshots, local payment simulation/cash due status, cart/checkout atomicity, fixed dated ECB CNY reference, and the existing Site access gate in README.md. Preparing final production build and same-site publication; no cloud storage, actual gateway, SMS service or audience expansion is introduced.
+
+
+### 2026-10-23 12:21:34 +08:00 — Build buyer ordering for publication
+
+- Final production build succeeded after the confirmation/title refinements. Earlier full regression suite (94 tests), TypeScript checks, new-module syntax checks and final whitespace checks passed; combined translations have 494 matching keys. No application source changed after this build.
+- Refreshed the short-lived Site source credential without persisting/exposing it. Confirmed private GitHub main remains at 445e95141d4452103ffaa07503e795500b8e0445. Preparing an exact-source archive and a base-tree GitHub update that retains collaborator-only files.
+- Existing browser-local merchant and buyer runtime records remain outside source uploads. No API secret, actual payment account, SMS service, cloud binding or Site access change is required. Retaining the reviewed local screenshots for the final handoff.
+
+
+### 2026-10-23 12:23:24 +08:00 — Publish buyer ordering
+
+- Packaged and pushed tested source 6c4e9a5485bdb80f642b4bcde6d0a02fa7b1376e with archive D:/hack/orderweave-buyer-ordering-deploy.tar.gz (414,284 compressed bytes). Saved Site version 16: appgprj_6ad8c26e2618819193b8337bdb29a5cf~appgver_364a0f4d1eac8191a132f524ef38fb61.
+- Deployment appgdep_6adae112490481918468370b39a2db7a succeeded at 12:23:10 local time on the unchanged Site URL. Preserved the custom four-user audience, environment revision 1, local data mode and existing AI provider configuration. No actual payment gateway or cloud storage was introduced.
+- Audited all 86 tracked UTF-8 source files for accidental runtime files and common credential patterns. Preparing the eleven changed source/test/documentation files for the private GitHub repository, with the base tree preserving all five collaborator-only reference files. No buyer/merchant localStorage, photos, real personal data, secret files, screenshots or archives are included in the source transfer.
