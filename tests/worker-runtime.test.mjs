@@ -15,6 +15,7 @@ async function runInWorker(outboundService,requestInput=input){
   {type:'ESModule',path:resolve('tests/worker-fixture/entry.mjs'),contents:`import {extractOrder} from '../../lib/deepseek.mjs';import {extractMenu} from '../../lib/menu-extraction.mjs';`+entry},
   ...await Promise.all(['public/import-limits.js','lib/menu-extraction.mjs','public/menu-import.js','public/materials.js','public/commerce.js','public/merchant-operations.js'].map(async path=>({type:'ESModule',path:resolve(path),contents:await readFile(resolve(path),'utf8')}))),
   {type:'ESModule',path:resolve('lib/deepseek.mjs'),contents:source},
+  {type:'ESModule',path:resolve('public/order-source.js'),contents:await readFile(new URL('../public/order-source.js',import.meta.url),'utf8')},
   {type:'ESModule',path:resolve('public/menu-matching.js'),contents:await readFile(new URL('../public/menu-matching.js',import.meta.url),'utf8')},
   {type:'ESModule',path:resolve('public/delivery-slots.js'),contents:await readFile(new URL('../public/delivery-slots.js',import.meta.url),'utf8')}
  ],bindings:{DEEPSEEK_API_KEY:'test-only-not-a-real-key'},outboundService});

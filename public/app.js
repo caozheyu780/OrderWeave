@@ -10,6 +10,9 @@ import {documentField,wireDocumentImport} from './document-import.js';
 import {createMenuImportUI} from './menu-import-ui.js';
 import {needsItemReview,applyItemReview,findMenuDish,suggestedMenuName} from './order-review.js';
 import {batchDraftIssue,prepareBatchOrders} from './batch-orders.js';
+import {routeBatchWarnings} from './order-source.js';
+import {orderEvidenceHtml,fullSourceHtml,batchWarningSummaryHtml,wireSourceNavigation} from './order-evidence.js';
+import {orderSourceMessages} from './order-source-i18n.js';
 import {cleanAliases,conflictingDish} from './menu-matching.js';
 import {deliveryWindow,deliveryWindowLabel,deliverySlotOptions,slotForTime,validLocalMinute} from './delivery-slots.js';
 
@@ -23,7 +26,7 @@ import {menuExportMessages} from './menu-export-i18n.js';
 import {openMenuExport} from './menu-export-ui.js';
 import {pricingFields,wirePricingEditor,readPricing} from './catalog-editor.js';
 import {money,cnyReference,optionText,validCents} from './commerce.js';
-for(const lang of ['zh','en','ms'])Object.assign(messages[lang],buyerMessages[lang],menuExportMessages[lang],documentMessages[lang],operationsMessages[lang]);
+for(const lang of ['zh','en','ms'])Object.assign(messages[lang],buyerMessages[lang],menuExportMessages[lang],documentMessages[lang],operationsMessages[lang],orderSourceMessages[lang]);
 let portal;try{portal=sessionStorage.getItem('orderweave-portal')||'merchant';}catch{portal='merchant';}
 const itemLabel=i=>e(i.name)+(optionText(i)?' <small>'+e(optionText(i))+'</small>':'');
 const dualMoney=(value,currency='MYR')=>e(money(value,languageConfig(language).locale,currency))+(currency==='MYR'?' <small class="cny-price">≈ '+e(money(cnyReference(value),languageConfig(language).locale,'CNY'))+'</small>':'');
@@ -118,13 +121,14 @@ function orderForm(id,draft,onReviewed){logEvent('form_order',id||'new');
   const original=account().orders.find(x=>x.id===id),o=original||draft||{},uncertain=(o.items||[]).some(needsItemReview),menuOnly=!!draft||!!o.sourceText||!!o.recognitionMethod||(o.items||[]).some(i=>i.matchType);
   openModal(t(original?'editOrder':draft?'reviewOrder':'newOrder'),`<form id="order-form" data-menu-only="${menuOnly}"><div class="modal-body">
     ${draft?`<div class="notice">${t('importReviewNotice')}${!draft.items.length?`<br>${t('noMatchedDishes')}`:''}</div>`:''}
-    ${draft?.warnings?.length?`<div class="notice">${draft.warnings.map(v=>e(rt(v))).join('<br>')}</div>`:''}
+    ${draft?.warnings?.length?`<div class="notice order-warning"><b>${t('orderUncertain')}</b><br>${draft.warnings.map(v=>e(rt(v))).join('<br>')}</div>`:''}${onReviewed?orderEvidenceHtml(o,pendingBatch?.sourceText||'',t):''}
     <div class="field"><div class="items-heading">${t('orderItems')}</div><datalist id="menu-options">${account().menu.map(d=>`<option value="${e(d.name)}"></option>`).join('')}</datalist><div id="item-rows">${(o.items?.length?o.items:[{}]).map(item=>itemRow(item,menuOnly)).join('')}</div>${button('add-item',t('addItem'),'small ghost')}</div>
     ${scheduleInputs(o,!!draft)}${input('customer',t('customer'),'text',o.customer,false,'','maxlength="100"')}
     ${input('location',t('location'),'text',o.location,true,'','maxlength="500"')}${input('contact',t('contact'),'text',o.contact,true,'','maxlength="200"')}${input('preference',t('preference'),'text',o.preference,false,'','maxlength="500"')}${textarea('notes',t('notes'),o.notes,false,'maxlength="3000"')}
     ${original&&o.status!=='delivered'?`<div class="field"><label for="order-status">${t('status')}</label><select id="order-status" name="status">${['pending','preparing','delivering'].map(s=>`<option value="${s}" ${s===o.status?'selected':''}>${t(s)}</option>`).join('')}</select></div>`:''}
-    ${o.sourceText?`<details ${uncertain?'open':''}><summary>${t('sourceText')}</summary><p class="detail-value" style="white-space:pre-wrap">${e(o.sourceText)}</p></details>`:''}<p id="order-error" class="error" role="alert"></p></div></form>`,footer(t(original?'saveChanges':draft?'reviewAndContinue':'saveOrder'),'order-form'));
+    ${onReviewed?fullSourceHtml(pendingBatch?.sourceText||'',t):''}${o.sourceText&&!onReviewed?`<details ${uncertain?'open':''}><summary>${t('sourceText')}</summary><p class="detail-value" style="white-space:pre-wrap">${e(o.sourceText)}</p></details>`:''}<p id="order-error" class="error" role="alert"></p></div></form>`,footer(t(original?'saveChanges':draft?'reviewAndContinue':'saveOrder'),'order-form'));
   const form=document.querySelector('#order-form');
+  if(onReviewed)wireSourceNavigation(form);
   if(original?.source==='buyer'){for(const control of form.querySelectorAll('#item-rows input,#item-rows select,#item-rows button'))control.disabled=true;form.querySelector('[data-action=add-item]').hidden=true;form.querySelector('#item-rows').insertAdjacentHTML('afterend','<p class="notice">'+t('paidOrderLocked')+'</p>');}
   if(onReviewed){modal.dataset.batchView='edit';modal.querySelector('button[type=submit]').textContent=t('batchReviewDone');}
   function resetReview(row){const input=row.querySelector('[name=itemName]'),dish=findMenuDish(account().menu,input.value),picker=row.querySelector('.menu-dish-select');if(picker)picker.value=dish?.id||'';input.setCustomValidity(menuOnly&&!dish?t('menuItemRequired'):'');const checkbox=row.querySelector('.match-check');if(checkbox){checkbox.checked=false;checkbox.disabled=menuOnly&&!dish;row.querySelector('.match-current').textContent=menuOnly&&!dish?t('menuItemRequired'):t('matchChanged')+' '+(dish?.name||input.value)+' × '+row.querySelector('[name=itemQuantity]').value;}}
@@ -152,18 +156,21 @@ async function merchantRequest(action,extra={}){const state=action?await cloudRe
 async function beginBatchTracking(kind,ids,method){const state=await merchantRequest('batch_begin',{kind,entryIds:ids,method});return state.batches.at(-1).id;}
 async function recordBatch(id,event,entryId){await merchantRequest('batch_event',{batchId:id,event,entryId});}
 async function startBatchReview(result,method){
-  const next={accountId:currentId,sourceText:result.sourceText,warnings:result.warnings||[],entries:result.orders.map(draft=>({id:uid(),draft:{...draft,recognitionMethod:method},reviewed:!batchDraftIssue(draft,account().menu)}))};
+  const drafts=result.orders.map(draft=>({...draft,warnings:[...(draft.warnings||[])]}));
+  const warnings=routeBatchWarnings(drafts,result.warnings,result.sourceText||'');
+  const next={accountId:currentId,sourceText:result.sourceText,warnings,entries:drafts.map(draft=>({id:uid(),draft:{...draft,recognitionMethod:method},reviewed:!draft.warnings.length&&!batchDraftIssue(draft,account().menu)}))};
   try{next.id=await beginBatchTracking('orders',next.entries.map(e=>e.id),method);pendingBatch=next;showBatchReview();}catch(error){toast(cloudMessage(error));}
 }
 function trackedOrders(batch){return prepareBatchOrders(batch.entries,account().menu,account().orders).map((order,i)=>({...order,batchId:batch.id,batchEntryId:batch.entries[i].id}));}
 function showBatchReview(){
   if(!pendingBatch||pendingBatch.accountId!==currentId)return;
   const entries=pendingBatch.entries;
-  openModal(t('batchTitle')+` (${entries.length})`,`<div class="modal-body"><div class="notice">${t('batchNotice')}</div>${pendingBatch.warnings.length?`<div class="notice">${pendingBatch.warnings.map(v=>e(rt(v))).join('<br>')}</div>`:''}<div class="batch-list">${entries.map((entry,index)=>{
-    const o=entry.draft,issue=batchDraftIssue(o,account().menu),ready=!issue;
-    return `<article class="batch-card"><h3>${t('batchOrder')} ${index+1} · ${e(o.customer||t('noCustomer'))}</h3><div class="batch-summary">${e(orderSummary({...o,number:String(index+1)}))}</div>${o.items.filter(i=>['alias','similar'].includes(i.matchType)).map(i=>`<div class="match-notice"><b>${t(i.matchType==='alias'?'matchAlias':'matchSimilar')}</b><div>${e(i.originalName)} → ${e(i.name)}</div><small>${t('matchNoticeOnly')}</small></div>`).join('')}${o.warnings?.length?`<div class="notice">${o.warnings.map(v=>e(rt(v))).join('<br>')}</div>`:''}${issue?`<p class="error">${t({menu:'menuItemRequired',match:'matchReviewRequired',items:'missingItems',quantity:'badQuantity',scheduledAt:'missingTime',location:'missingLocation',contact:'missingContact'}[issue])}</p>`:''}<div class="row">${button('batch-edit',t('batchEdit'),'small',`data-id="${entry.id}"`)}${button('batch-remove',t('batchRemove'),'small ghost',`data-id="${entry.id}"`)}</div><p class="batch-ready">${t(ready&&entry.reviewed?'batchReady':'batchNeedsReview')}</p><details><summary>${t('sourceText')}</summary><p class="detail-value" style="white-space:pre-wrap">${e(o.sourceText||pendingBatch.sourceText)}</p></details></article>`;
-  }).join('')}</div>${!entries.length?`<p>${t('batchEmpty')}</p>`:''}<p id="batch-error" class="error" role="alert"></p></div><div class="modal-foot sticky">${button('close-modal',t('batchDiscard'))}${button('batch-confirm',t('batchConfirm'),'primary',!entries.length||entries.some(x=>!x.reviewed||batchDraftIssue(x.draft,account().menu))?'disabled':'')}</div>`);
+  openModal(t('batchTitle')+` (${entries.length})`,`<div class="modal-body"><div class="notice">${t('batchNotice')}</div>${batchWarningSummaryHtml(entries,pendingBatch.warnings,t,rt)}<div class="batch-list">${entries.map((entry,index)=>{
+    const o=entry.draft,issue=batchDraftIssue(o,account().menu),ready=!issue,uncertain=!!o.warnings?.length||!!issue||o.items.some(needsItemReview);
+    return `<article class="batch-card ${uncertain?'batch-card-uncertain':''}" data-batch-entry="${entry.id}"><h3>${t('batchOrder')} ${index+1} · ${e(o.customer||t('noCustomer'))}</h3>${uncertain?`<p class="order-warning-badge">${t(entry.reviewed&&!issue?'orderWarningsReviewed':'orderUncertain')}</p>`:''}<div class="batch-summary">${e(orderSummary({...o,number:String(index+1)}))}</div>${o.items.filter(i=>['alias','similar'].includes(i.matchType)).map(i=>`<div class="match-notice"><b>${t(i.matchType==='alias'?'matchAlias':'matchSimilar')}</b><div>${e(i.originalName)} → ${e(i.name)}</div><small>${t('matchNoticeOnly')}</small></div>`).join('')}${o.warnings?.length?`<div class="notice order-warning">${o.warnings.map(v=>e(rt(v))).join('<br>')}</div>`:''}${issue?`<p class="error">${t({menu:'menuItemRequired',match:'matchReviewRequired',items:'missingItems',quantity:'badQuantity',scheduledAt:'missingTime',location:'missingLocation',contact:'missingContact'}[issue])}</p>`:''}<div class="row">${button('batch-edit',t('batchEdit'),'small',`data-id="${entry.id}"`)}${button('batch-remove',t('batchRemove'),'small ghost',`data-id="${entry.id}"`)}</div><p class="batch-ready">${t(ready&&entry.reviewed?'batchReady':'batchNeedsReview')}</p>${orderEvidenceHtml(o,pendingBatch.sourceText||'',t)}</article>`;
+  }).join('')}</div>${fullSourceHtml(pendingBatch.sourceText||'',t)}${!entries.length?`<p>${t('batchEmpty')}</p>`:''}<p id="batch-error" class="error" role="alert"></p></div><div class="modal-foot sticky">${button('close-modal',t('batchDiscard'))}${button('batch-confirm',t('batchConfirm'),'primary',!entries.length||entries.some(x=>!x.reviewed||batchDraftIssue(x.draft,account().menu))?'disabled':'')}</div>`);
   modal.dataset.batchView='list';
+  wireSourceNavigation(modal.querySelector('.modal-body'));
 
 }
 function closeOrderModal(){
