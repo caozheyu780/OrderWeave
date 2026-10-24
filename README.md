@@ -1,5 +1,27 @@
 # OrderWeave
+# OrderWeave
 
+Turns messy group-chat orders from small food businesses in Malaysia into a
+clean order list. AI extracts the details; the merchant reviews and confirms
+every order.
+
+## Submission materials
+
+| # | Item | Link |
+|---|---|---|
+| 1 | Project proposal | [Submission Template (PDF)](docs/SDC%20Hackathon_%20Submission%20Template_%283%29.pdf) |
+| 2 | Pitch slides | [orderweave_compressed.pptx](docs/orderweave_compressed.pptx) |
+| 3 | Working prototype | https://order-weave.replit.app |
+| 4 | Tools and resources declaration | [SDC2026_TeamX_TechDeclaration_compressed.pdf](docs/SDC2026_TeamX_TechDeclaration_compressed.pdf) |
+| 5 | Source code | This repository |
+| 6 | Pitch video (5-7 min) | https://youtu.be/vjMA827OcEk |
+
+All demo data is synthetic. AI test sets and results: [ai_extraction/](ai_extraction/).
+License: Apache 2.0. Team: [TEAM NAME] ([MEMBER 1], [MEMBER 2], [MEMBER 3], [MEMBER 4]).
+
+---
+
+## Developer notes
 ## Receiving, kitchen and order approval
 
 The merchant Orders page includes daily receiving-hour settings with a store time zone. Disabled scheduling accepts all day; enabled windows include the opening minute and exclude the closing minute. An earlier closing time crosses midnight. Buyer checkout rechecks current receiving hours and keeps the cart if closed. Merchants can still manually enter or import orders for reconciliation. Existing stores default to unrestricted receiving hours.
