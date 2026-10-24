@@ -17,7 +17,7 @@ every order.
 | 6 | Pitch video (5-7 min) | https://youtu.be/vjMA827OcEk |
 
 All demo data is synthetic. AI test sets and results: [ai_extraction/](ai_extraction/).
-License: Apache 2.0. Team: [TEAM NAME] ([MEMBER 1], [MEMBER 2], [MEMBER 3], [MEMBER 4]).
+License: Apache 2.0. Team: [TEAM X] ([LIU SHIWEI], [LIU JIAXIN], [CAO ZHEYU], [CHEN YUZHE]).
 
 ---
 
